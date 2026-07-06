@@ -1,0 +1,14 @@
+{
+  "private": true,
+  "scripts": {
+    "dev": "slidev",
+    "build": "slidev build --base /git-worktrees/",
+    "export": "slidev export --format pptx --output ../git-worktrees.pptx --with-clicks=false"
+  },
+  "dependencies": {
+    "@slidev/cli": "^51.0.0"
+  },
+  "devDependencies": {
+    "playwright-chromium": "^1.49.1"
+  }
+}
