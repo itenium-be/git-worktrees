@@ -72,6 +72,22 @@ What you get:
 Worth showing live: `git worktree list` with four trees, then `cat ../feat-payments/.git`
 to reveal the pointer. It demystifies the whole thing in about five seconds.
 
+### The tooling has already conceded this point
+
+You don't have to take my word for it — watch what the agent tools ship:
+
+- Claude Code can run each parallel subagent in its own worktree, as a built-in option.
+  Not a blog-post workaround; a flag.
+- Agent-oriented editors keep growing "run these sessions in parallel" modes, and every
+  one of them lands on a worktree or a container underneath.
+- A small industry of wrappers has appeared to make them ergonomic — `phantom`,
+  `git-worktree-switcher`, worktree panels in GitKraken and lazygit.
+- GitButler bets the *other* way: one directory, multiple virtual branches applied at
+  once. Different answer, same admission.
+
+A plumbing command from 2015 became a checkbox in AI tooling in about eighteen months.
+That's the ecosystem agreeing on what the contended resource actually is: **the filesystem.**
+
 **And now the next problem:** the trees are isolated. Rather more isolated than you wanted.
 
 ---
@@ -274,6 +290,186 @@ more reviewers.
 
 ---
 
+## Appendix: worktrees in depth
+
+Backup-slide material. Mostly you won't show this, but it's what people ask about
+afterwards.
+
+### The command surface
+
+| Command | What it's for |
+| --- | --- |
+| `git worktree add <path> -b <branch>` | new branch, new tree — the 90% case |
+| `git worktree add <path> <branch>` | check out an existing branch |
+| `git worktree add <path>` | branch is named after the directory |
+| `git worktree add --detach <path>` | no branch — throwaway tree for bisecting or "just look" |
+| `git worktree add --guess-remote <path>` | track `origin/<dir-name>` if it exists |
+| `git worktree list [--porcelain]` | what exists; `--porcelain` is the scripting hook |
+| `git worktree remove <path>` | **the correct way to delete one** (`--force` if dirty) |
+| `git worktree prune` | clean up after someone `rm -rf`'d a tree instead |
+| `git worktree move <from> <to>` | relocate a tree |
+| `git worktree repair` | fix the pointers after you moved things by hand |
+| `git worktree lock / unlock` | stop `prune` touching a tree on a detached drive |
+
+What it actually looks like (git 2.43, real output):
+
+```console
+$ git worktree list
+/scratch/demo           d2aff83 [main]
+/scratch/feat-payments  d2aff83 [feat-payments]
+
+$ cat ../feat-payments/.git
+gitdir: /scratch/demo/.git/worktrees/feat-payments
+```
+
+The branch mutex, verbatim:
+
+```console
+$ git worktree add ../another feat-payments
+Preparing worktree (checking out 'feat-payments')
+fatal: 'feat-payments' is already used by worktree at '/scratch/feat-payments'
+```
+
+And the gotcha everyone hits — delete the directory by hand and git still has the
+metadata, so the branch stays locked until you prune:
+
+```console
+$ rm -rf ../feat-payments
+$ git worktree list
+/scratch/demo           d2aff83 [main]
+/scratch/feat-payments  d2aff83 [feat-payments] prunable   # ← still there
+
+$ git worktree prune      # now the branch is free again
+```
+
+**GUI support is the weak spot.** This is a CLI-first feature and the tooling is uneven:
+lazygit has a worktrees panel, GitKraken and Tower support them, VS Code has no native
+UI (each tree is simply another window — extensions fill the gap), and JetBrains varies
+by version. Support moves fast enough that you should check your own machine before
+demoing anything. **Demo the CLI.**
+
+### What's shared, what isn't
+
+The single most useful table in the talk, because everything below is a consequence of it:
+
+| Per-tree (isolated) | Shared (one copy, common dir) |
+| --- | --- |
+| HEAD, index, working files | objects, refs, branches, tags |
+| in-progress rebase / merge / bisect | **`git stash`** ← surprises everyone |
+| HEAD's reflog, `ORIG_HEAD` | hooks, remotes, config |
+| sparse-checkout settings | submodule git dirs (`.git/modules/*`) |
+
+`refs/stash` lives in the common dir, so there is **one stash stack for every worktree**.
+Agent A stashes, agent B pops, and the isolation you just bought evaporates. If you need
+per-tree config, `git config --worktree` works — but only after
+`git config extensions.worktreeConfig true`.
+
+### Sharing `node_modules` but not `bin/obj`
+
+One rule decides every case:
+
+> **Share what the lockfile determines. Never share what your source determines.**
+
+`node_modules` is a pure function of the lockfile — two trees on the same lockfile want
+byte-identical contents, so sharing is free. `bin/`, `obj/`, `dist/`, `target/` are
+functions of *your code*, which is precisely the thing that differs per tree. Share those
+and you have rebuilt the original problem: agent A's build output overwrites agent B's and
+the tests run against the wrong binary. (In .NET it's worse than wrong — `obj/project.assets.json`
+bakes in absolute paths, so even copying it is broken.)
+
+How to actually share the shareable half:
+
+1. **pnpm.** The right answer. Content-addressed global store, each tree's `node_modules`
+   is links into it. Eight trees cost about what one costs. No configuration.
+2. **npm / yarn.** The *cache* (`~/.npm`) is already global, so `npm ci` is network-free —
+   but still writes a full copy per tree. Fine at three trees, painful at ten.
+3. **`cp -al ../main/node_modules node_modules`.** Hardlink copy: near-instant, almost no
+   disk. Works because installers replace files rather than edit them in place. Verify with
+   native modules before trusting it.
+4. **CoW filesystems.** `cp --reflink=auto` on btrfs/XFS, or ZFS/btrfs snapshots — provision
+   an entire tree, dependencies included, instantly.
+5. **Symlinking `node_modules` to another tree.** Cheap, and a trap. The moment two branches
+   disagree about the lockfile, one agent is silently testing against the other's dependencies
+   and nothing warns you.
+
+Per ecosystem:
+
+| | Share | Never share |
+| --- | --- | --- |
+| Node | store via pnpm, or `~/.npm` cache | `dist/`, `.next/` |
+| .NET | `~/.nuget/packages` (already global) | `bin/`, `obj/` |
+| Java | `~/.m2`, Gradle cache | `target/`, `build/` |
+| Rust | `CARGO_TARGET_DIR` *can* be shared — cargo locks and fingerprints it, saving real disk, at the cost of builds serialising on that lock | — |
+| Python | the wheel cache; use `uv` | the venv itself — absolute paths are baked into shebangs and `pyvenv.cfg`, so it is neither shareable nor movable |
+
+One .NET-specific landmine: if someone has set a shared `BaseOutputPath` or `ArtifactsPath`
+in `Directory.Build.props`, every worktree writes build output to the same place and you get
+the collision anyway. Check before you scale up.
+
+### The bare repo layout
+
+```bash
+git clone --bare git@github.com:org/repo .bare
+echo "gitdir: ./.bare" > .git
+git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
+git fetch origin
+git worktree add main
+git worktree add feat-payments -b feat-payments
+```
+
+```
+repo/
+├── .bare/           # the object database
+├── .git             # a file: "gitdir: ./.bare"
+├── main/            # just a worktree
+└── feat-payments/   # also just a worktree
+```
+
+That third command is not optional. `git clone --bare` sets **no** fetch refspec, so
+without it `git fetch` populates no remote-tracking branches and you will spend twenty
+confusing minutes wondering where `origin/main` went.
+
+**Why bother?**
+
+- **No privileged checkout.** In the normal layout your original clone owns the real `.git`
+  directory and every other tree hangs off it. Delete it by accident and you've deleted the
+  repository. Here, `main` is an ordinary worktree — remove it, recreate it, nobody cares.
+- **One folder is the project.** The normal layout sprawls siblings — `../feat-x`, `../feat-y`,
+  `../fix-z` — through your projects directory, with nothing indicating they're related.
+  Bare layout nests them, and `rm -rf repo/` disposes of everything cleanly.
+- **Git works from the root.** The `.git` file means `git fetch` and `git worktree list` run
+  from the top level, even though it isn't a worktree.
+- **It matches the mental model.** A shared database plus N disposable workspaces, with no
+  copy that's more "real" than the others. Which is exactly the story this talk is telling —
+  for agents, no checkout should be special.
+
+Cost: the setup ritual, that refspec footgun, and the occasional tool that assumes a normal
+clone.
+
+### Submodules: where the isolation stops
+
+Two problems, both verified rather than folklore.
+
+**They don't come along.** `git worktree add` leaves submodule directories empty. Every new
+tree needs `git submodule update --init --recursive` by hand — one more reason tree creation
+should be a script, not a command.
+
+**They aren't isolated.** A submodule's git dir lives in the *superproject's* common
+directory:
+
+```console
+$ cat libs/sub/.git
+gitdir: ../../.git/modules/libs/sub
+```
+
+`.git/modules/` is shared by every worktree. So the isolation you bought at the top level
+does not reach all the way down: two trees pinning different submodule commits are contending
+over the same submodule state. `git worktree repair` fixes pointers after moves, but it
+doesn't fix the underlying sharing.
+
+If you're on submodules and going parallel: test it hard before betting a workflow on it.
+This is one of the better arguments for package registries over submodules.
+
 ## Running this as a lightning talk
 
 Five minutes is four beats, not eight.
@@ -288,7 +484,13 @@ Notes on delivery:
 - **Rung 5 is the strongest material.** Nobody sees semantic conflicts coming. Lead with
   the duplicate migration number — it gets a laugh of recognition, and the laugh tells you
   the room has lived it.
+- **Show the shared/per-tree table with `stash` boxed in red.** Fifteen seconds, genuinely
+  surprising, and it sets up rung 2 perfectly: worktrees isolate the *filesystem*, and every
+  problem after that is something they didn't isolate.
 - **Rung 2 is your backup slide.** Skip it in the talk; someone will corner you about
   `.env` files afterwards, and you'll want it.
 - **Name Bors and the year.** It sets up the close two beats early, and people remember
   the callback.
+
+The appendix is your Q&A ammunition — commands, `node_modules` vs `bin/obj`, the bare
+layout, submodules. Expect the `node_modules` question every single time.
