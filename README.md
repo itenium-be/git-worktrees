@@ -494,3 +494,120 @@ Notes on delivery:
 
 The appendix is your Q&A ammunition — commands, `node_modules` vs `bin/obj`, the bare
 layout, submodules. Expect the `node_modules` question every single time.
+
+---
+
+## Parking lot
+
+Candidate topics, none currently in the cut. Written up to be argued about later.
+
+### Jujutsu (`jj`)
+
+The "here's where this is heading" slide. `jj` is git-backed — `jj git init --colocate`
+adopts an existing repository, so this isn't a migration — and its equivalent of worktrees
+is *workspaces*. But the interesting part isn't the workspaces, it's the model underneath,
+which happens to remove three of our rungs by construction:
+
+- **No staging area.** The working copy *is* a commit, re-snapshotted on every command.
+  "The agent staged the wrong files" stops being a category of error that can occur.
+- **Automatic snapshots plus an operation log.** Every repository operation is recorded and
+  reversible — not just file changes, but rebases, merges, and branch moves. An agent
+  cannot destroy work, and you can undo a bad *operation*, not just a bad commit.
+- **Conflicts are first-class objects.** A rebase always succeeds; the conflict is recorded
+  in the resulting commit and resolved whenever you like. In a world of N agents rebasing
+  against a moving `main`, "the rebase never blocks" is a structural change to rung 3, not
+  a convenience.
+
+Read together: most of what we're bolting onto git for agents, `jj` already treats as the
+default. **Verdict: excellent closing slide, dangerous middle slide.** It opens a second
+front — half the room won't know it, and "consider replacing your VCS" is a large ask in
+five minutes. Best as a single forward-looking beat after the real close, if at all.
+
+### Sparse checkout and partial clone
+
+The strongest candidate, because it reinforces rung 5 instead of adding a topic.
+
+```bash
+git clone --filter=blob:none git@github.com:org/monorepo    # history without the blobs
+git sparse-checkout set --cone apps/web libs/ui             # materialise only this slice
+```
+
+Crucially, **sparse-checkout settings are per-worktree** (see the shared/per-tree table),
+so every agent's tree can carry a different cone. On a large monorepo that's the difference
+between eight trees being unthinkable and being routine: eight 200 MB slices instead of
+eight 4 GB clones.
+
+The conceptual payoff is better than the disk saving, though. "Disjoint blast radii" stops
+being an instruction you give an agent and becomes a property of its filesystem — it cannot
+edit, or even read, code that was never materialised. That is context engineering by way of
+git plumbing: a smaller tree is also a smaller space for an agent to wander into.
+
+Caveats: `--filter` needs server support (GitHub has it), and build tools or IDEs that assume
+a complete checkout will need convincing. **Verdict: the one I'd actually add.** It costs
+about forty seconds and makes rung 5 land harder.
+
+### Containers as the next rung of isolation
+
+Rung 2 established that worktrees aren't hermetic. This generalises it into a spectrum:
+
+```
+worktree        →  devcontainer       →  remote VM / cloud session
+filesystem         + ports, services     + CPU, network, blast radius
+                     toolchain versions
+```
+
+Each step isolates more and costs more. Worktrees do nothing about ports, databases, global
+caches, the version of Node on your PATH, or anything an agent does *outside* the repository
+— `npm i -g`, docker state, system files. Containers cover that; remote sessions cover the
+machine itself.
+
+The useful framing is a rule rather than a recommendation: **isolate at the cheapest rung
+that separates the thing actually colliding.** Most teams need worktrees plus a bootstrap
+script, not a container per agent. **Verdict: one line inside rung 2, not its own slide.**
+Low novelty — everyone already knows containers exist — but it stops the "why not just use
+Docker?" question from derailing Q&A.
+
+### `git rerere`
+
+Small, practical, chronically underused.
+
+```bash
+git config rerere.enabled true
+```
+
+Git records how you resolved a conflict and replays that resolution automatically when the
+same conflict reappears. With a merge queue this is worth more than it looks: agents rebase
+repeatedly against a moving target and hit *the same conflict* on every retry. Enable rerere
+and you resolve it once.
+
+There's a neat tie-in with the shared/per-tree table — `rr-cache` lives in the common dir,
+so it's shared across every worktree. Agent A's resolution silently helps agent B. That's
+the sharing model working *for* you for once.
+
+The catch is the same mechanism: it applies a remembered resolution quietly, so if the right
+answer has changed since, you get a stale merge with no announcement. `git rerere diff` to
+inspect, `git rerere forget <path>` to reset. **Verdict: a one-line "turn this on" aside
+during rung 3.** Real value, no narrative weight.
+
+### "Or don't branch at all"
+
+The honest counter-argument, and worth taking seriously because the whole talk assumes
+branch-per-agent.
+
+Trunk-based development says the merge problem is self-inflicted: don't accumulate divergence
+and you won't need machinery to reconcile it. Agents commit small increments straight to
+main, incomplete work hides behind feature flags, integration happens continuously, and rungs
+3, 4 and 5 shrink dramatically — there's no rebase race, no stale branch, no week of semantic
+drift to discover at merge time.
+
+What it costs: rung 0 has to be much stronger, because there's no branch quarantine — bad
+code reaches main immediately. You've traded *merge* risk for *production* risk, which you
+then manage with flags and progressive delivery. Whether that's a good trade depends on how
+much you trust your guardrails, which is a nice callback.
+
+And note what survives: agents still need separate working directories even when every one of
+them targets main. **Branches are the optional part; worktrees aren't.** That's the sharpest
+line in this section and it arguably belongs in the talk regardless.
+
+**Verdict: worth thirty seconds of steelmanning.** Naming the strongest objection yourself
+makes everything before it more credible.
