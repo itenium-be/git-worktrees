@@ -29,6 +29,23 @@ That's 20 tight. First things to cut if you're running long: the stabiliser deta
 and one war story. Never cut the guardrails block — it's the only part of the talk that
 sends people home with something to do on Monday.
 
+## Still to fill in
+
+Everything below is written; these are the holes only you can plug. Each is marked
+**FILL IN** in place.
+
+| Where | What's needed |
+| --- | --- |
+| Act 2 — war stories | one security anecdote, one architecture anecdote |
+| Act 3 — the realisation | the specific moment you decided to automate the orchestration |
+| Act 3 — the system | what Spark, Weld and Gauge actually do (my guesses are in the table) |
+| Act 3 — the diagram | confirm the wiring, then redraw |
+| Act 3 — memory | one lesson that became a hook, lint rule or ArchUnit test |
+| Act 3 — dashboard | which two or three numbers you actually read each morning |
+| Act 3 — cost | real tokens/money/hardware, and the setup time |
+| Act 3 — what's broken | two or three things that genuinely still don't work |
+| Screenshots | one Claude, two Claudes, six Claudes, the dashboard |
+
 ---
 
 # Act 1 — It gets out of hand
@@ -211,7 +228,8 @@ Two rules make this work:
 
 ### War stories: security
 
-*(Slot your own anecdotes here — these are the buckets they'll fall into.)*
+> **FILL IN — two war stories, one here and one under architecture. These are the buckets
+> yours will fall into; pick the one with the best reveal, not the worst outcome.**
 
 - auth on every endpoint except the one added last Tuesday
 - loads the record by ID straight from the request, never checks who owns it
@@ -231,7 +249,8 @@ is precisely why this one cannot be left to review-by-vibes, and has to be mecha
 
 ### War stories: architecture
 
-*(Same — your stories, these buckets.)*
+> **FILL IN — your story. The ideal one is where the code was *reasonable* in isolation
+> and wrong in context: that's the whole point you're making.**
 
 - writes a second `UserService` because it never found the first
 - controller reaches straight into the database, because the short path was shorter
@@ -320,40 +339,145 @@ That's not six terminals any more. **That's a control loop I'm operating by hand
 
 # Act 3 — The loop
 
-So stop operating it by hand.
+## The realisation
 
-> **PLACEHOLDER — your system. I need details before I can write this properly.**
->
-> What I know you named: **Architects**, **Implementers**, **Weld**, **Spark**, **Gauge**,
-> a **UI dashboard**, and **CLI tooling**.
->
-> My guesses, so you have something to correct rather than a blank form:
-> Weld = the merger (joins branches / runs the queue)? Spark = the spawner (ignites new
-> agent sessions from a work item)? Gauge = the measurement layer (quality gates, metrics,
-> the thing that decides if work is done)? Tell me which of these are wrong and what each
-> one actually does, and I'll write this act to match.
+Count what was running by the end of Act 2: something deciding what to build, several
+things building it, something merging, something repairing `main`. Roles. Signals. Retries.
+Repair.
 
-The shape this act needs, once the details are in:
+That's a control loop. I had built one by hand, and then appointed myself its scheduler —
+which is the single worst job to give a human. Schedulers need to hold every task's state
+at once, switch context for free, and never sleep. I can do none of those things. I was the
+slowest component in a system I had accidentally designed.
 
-1. **The reveal.** One diagram: work in at the top, merged code out at the bottom, every
-   role from Act 2 now a box. The audience should recognise every box, because they watched
-   you build each one under duress.
-2. **Architects vs implementers** — the direct payoff to "the agent has local context and
-   no taste". Architects hold the global view and cut work into pieces with disjoint blast
-   radii; implementers are local, parallel, and disposable. Decomposition stops being a
-   design preference and becomes your parallelism strategy.
-3. **Where the memory lives.** Six agents rediscovering the same quirk six different ways
-   is the last failure mode. Lessons belong in the repo, not the session: CLAUDE.md, skills,
-   ADRs — and better, a check that fails, because a convention that's merely documented is
-   optional. *If you've told an agent something twice, it belongs in the repo.*
-4. **The dashboard.** This is where a screenshot earns its keep. The emotional beat is the
-   contrast with slide two: you stopped watching six terminals and started watching one
-   system. That's the whole talk in one image.
-5. **What it costs.** One honest slide. Whatever this actually cost you in tokens, machine
-   time, and evenings — say the real number. It buys back all the credibility that "fuck
-   the code" spent.
+So: stop operating it by hand.
 
----
+> **FILL IN — the honest version of this beat.** What was the actual moment you decided to
+> automate the orchestration rather than keep doing it? The specific straw. Talks live on
+> specifics: "it was 1am and I was rebasing for the fourth time" beats any amount of
+> reasoning about control loops.
+
+## The system
+
+> **FILL IN — I've laid out the slide with my guesses so there's something to correct
+> rather than a blank form. Replace the italics; the "why it exists" column is the part
+> that matters on stage, because it ties each box back to a scar from Act 1 or 2.**
+
+| Role | What it does | Why it exists |
+| --- | --- | --- |
+| **Architects** | *global view; cut work into pieces with disjoint blast radii* | "the agent has local context and no taste" |
+| **Implementers** | *local, parallel, disposable; one worktree each* | two Claudes overwriting each other |
+| **Spark** | *??? my guess: spawns sessions from work items* | you can't hand-start six agents |
+| **Weld** | *??? my guess: the merger — the dedicated merge-queue session* | rebase, test, main moved, repeat |
+| **Gauge** | *??? my guess: measurement — quality gates, the "is this done" verdict* | you stopped reading the diffs |
+| **Dashboard** | *the one screen that replaced the six terminals* | you can't watch six terminals |
+| **CLI tooling** | *how you intervene when it goes wrong* | it will go wrong |
+
+A shape to verify — redraw once the roles are confirmed:
+
+```
+     work item
+         │
+    ┌────▼─────┐   decompose into
+    │ Architect│   disjoint slices
+    └────┬─────┘
+         │
+    ┌────▼─────┐   one worktree,
+    │  Spark   │   one session each
+    └────┬─────┘
+    ┌────┼────┬─────────┐
+    ▼    ▼    ▼         ▼
+  impl impl impl  …  impl        ← parallel, isolated, disposable
+    └────┴────┴────┬────┘
+              ┌────▼────┐   merge-on-build,
+              │  Weld   │   serialised landing
+              └────┬────┘
+              ┌────▼────┐   did it actually work?
+              │  Gauge  │   ── red ──▶ stabiliser ──┐
+              └────┬────┘                            │
+                   │◀───────────────────────────────┘
+                 main
+```
+
+The line to say while this is on screen: **every box on this diagram is a scar.** None of
+it was designed. Each one was added the week something broke, and the shape only looks
+deliberate in retrospect.
+
+## Architects and implementers
+
+This is the direct payoff to "the agent has local context and no taste", so land the
+callback explicitly.
+
+The fix for a vantage-point problem is not a better prompt — it's a different vantage
+point. So one role holds the global view and does nothing else: read the system, decide
+the seams, cut the work into pieces that *cannot* semantically collide. The implementers
+are then deliberately local, parallel, and disposable, because that's the only thing you
+can safely run six of.
+
+And here's where the talk's argument closes:
+
+> **Decomposition stopped being a design preference and became my parallelism strategy.**
+
+If everything routes through one 4,000-line service class, the architect can only ever hand
+out one non-conflicting slice, and you have one implementer. The number of agents you can
+usefully run is a direct readout of how well your codebase decomposes. That was always true
+for humans — you just never ran ten of them at once, so you never found out.
+
+## Where the memory lives
+
+The last failure mode, and it's the one that creeps up quietly: six agents rediscovering
+the same quirk in six different ways, then solving it in six different styles. Parallel
+agents don't merely fail to share what they learn — they actively diverge, and the codebase
+grows dialects.
+
+Session context is the wrong place for a lesson, because sessions end. The rule:
+
+> **If you've told an agent something twice, it belongs in the repo.**
+
+CLAUDE.md, skills, ADRs — and better than any prose, a check that fails, because a
+convention that is merely documented is a convention that is optional. Which is the
+guardrails block again, arriving from a different direction: guardrails aren't just quality
+control, they're how a system remembers.
+
+> **FILL IN:** one concrete example of a lesson that made this trip — something an agent
+> got wrong twice, that is now a hook, a lint rule, or an ArchUnit test.
+
+## The dashboard
+
+Screenshot. This is the payoff shot, and it should be composed to echo the six-terminals
+slide from Act 1 as directly as possible — same framing if you can manage it.
+
+Say the contrast out loud, because it's the entire talk in one image:
+
+> **I stopped watching six terminals and started watching one system.**
+
+> **FILL IN:** what's actually on it — queue depth, who's building what, how long the
+> stabiliser has been red, cost burn? Pick the two or three numbers you genuinely look at
+> first thing in the morning, and say that's why they're there. A dashboard nobody reads
+> is a slide nobody believes.
+
+## What it costs
+
+One slide, real numbers, no hedging. This is what buys back the credibility that "fuck the
+code" spent eleven minutes ago — an audience forgives ambition and does not forgive vagueness.
+
+> **FILL IN:** tokens or money per day/week; machine specs you needed; how long the setup
+> took; how much of it you'd rebuild versus keep. If the honest answer is "more than I
+> expected", say exactly that — it's the most trustworthy sentence available to you here.
+
+## What's still broken
+
+Do not end on "and it all works great" — the room stops believing you, and you lose the
+Q&A. One slide of what remains genuinely unsolved is worth more than any feature on the
+diagram.
+
+> **FILL IN — candidates, pick two or three that are actually true for you:**
+> flaky tests still poison the queue; the architect sometimes cuts slices that aren't as
+> disjoint as it thought; nobody has read some of this code; cost is not linear in output;
+> onboarding a colleague to this is a nightmare; you still can't leave it running unattended
+> overnight; the guardrails catch what you thought to write a guardrail for, and nothing else.
+
+That last one, if it's true, is the strongest possible setup for the close.
 
 # The close
 
