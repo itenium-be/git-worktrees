@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<!-- PROTOTYPE — throwaway aesthetic comparison, delete after decision. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Git Worktrees — Multiplayer IDE</title>
+<style>
+  :root{
+    --claude:#D97757; --codex:#2DB88E; --gemini:#8E7CF0;
+    --bg:#0b0e14; --editor:#0d1117; --panel:#131924; --panel2:#0f1420;
+    --line:#1c2431; --muted:#5a6678; --fg:#c9d4e3; --dim:#8592a6;
+    --tab:#0a0e15; --accent:#4c9ffb;
+    --kw:#c792ea; --str:#89ca78; --com:#5a6678; --fn:#82aaff; --var:#e0e6f0; --num:#f78c6c; --punc:#7f8ba3;
+    --ease:cubic-bezier(.16,.84,.32,1);
+    --ease2:cubic-bezier(.22,1,.36,1);
+    --mono:"SF Mono",'JetBrains Mono','Fira Code',Menlo,Consolas,'Liberation Mono',monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--fg);font-family:var(--sans)}
+  #stage{
+    position:fixed;inset:0;overflow:hidden;cursor:pointer;
+    background:
+      radial-gradient(1200px 700px at 78% -10%, rgba(76,159,251,.10), transparent 60%),
+      radial-gradient(1000px 600px at 15% 110%, rgba(142,124,240,.10), transparent 60%),
+      var(--bg);
+  }
+  .slide{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    opacity:0;visibility:hidden;pointer-events:none;
+    transition:opacity .5s var(--ease);
+  }
+  .slide.active{opacity:1;visibility:visible}
+
+  /* ---------- editor window chrome ---------- */
+  .win{
+    position:relative;background:linear-gradient(180deg,#0f1521,#0b0f18);
+    border:1px solid var(--line);border-radius:14px;overflow:hidden;
+    box-shadow:0 40px 120px -30px rgba(0,0,0,.85), 0 0 0 1px rgba(255,255,255,.02) inset;
+  }
+  .titlebar{
+    height:38px;display:flex;align-items:center;gap:14px;padding:0 14px;
+    background:linear-gradient(180deg,#141b28,#0e141f);border-bottom:1px solid var(--line);
+  }
+  .lights{display:flex;gap:8px}
+  .lights i{width:12px;height:12px;border-radius:50%;display:block}
+  .lights i:nth-child(1){background:#ff5f57}.lights i:nth-child(2){background:#febc2e}.lights i:nth-child(3){background:#28c840}
+  .winttl{font-family:var(--mono);font-size:12px;color:var(--dim);letter-spacing:.3px}
+  .presence-top{margin-left:auto;display:flex;align-items:center;gap:-6px}
+  .avatar{width:22px;height:22px;border-radius:50%;margin-left:-6px;border:2px solid #0e141f;font-size:10px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;color:#0b0e14;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+
+  .tabstrip{display:flex;background:#0a0e15;border-bottom:1px solid var(--line);height:34px;overflow:hidden}
+  .tab{display:flex;align-items:center;gap:7px;padding:0 14px;font-family:var(--mono);font-size:11.5px;color:var(--muted);
+    border-right:1px solid var(--line);white-space:nowrap;position:relative}
+  .tab.on{color:var(--fg);background:var(--editor)}
+  .tab .dot{width:8px;height:8px;border-radius:50%}
+  .tab.on::after{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent)}
+
+  .body{display:flex;background:var(--editor)}
+  .sidebar{width:172px;flex:0 0 172px;background:var(--panel2);border-right:1px solid var(--line);padding:10px 6px;font-family:var(--mono);font-size:11.5px}
+  .stree .row{display:flex;align-items:center;gap:6px;padding:3px 8px;border-radius:5px;color:var(--dim)}
+  .stree .row.f{color:var(--muted)}
+  .stree .row.sel{background:rgba(76,159,251,.10);color:var(--fg)}
+  .stree .ico{opacity:.8}
+  .code{flex:1;padding:12px 0;font-family:var(--mono);font-size:13px;line-height:1.62;position:relative;overflow:hidden}
+  .cl{display:flex;padding:0 16px;white-space:pre;position:relative}
+  .gutter{width:34px;flex:0 0 34px;color:#3b4657;text-align:right;padding-right:14px;user-select:none}
+  .kw{color:var(--kw)}.str{color:var(--str)}.com{color:var(--com)}.fn{color:var(--fn)}.va{color:var(--var)}.nu{color:var(--num)}.pu{color:var(--punc)}
+  .commit-dot{position:absolute;left:9px;width:9px;height:9px;border-radius:50%;opacity:0;transform:scale(.3)}
+
+  /* presence cursor */
+  .pcursor{position:absolute;top:0;left:0;z-index:20;pointer-events:none;
+    transition:transform .9s var(--ease2);will-change:transform}
+  .pcursor .caret{width:2px;height:18px;border-radius:2px;box-shadow:0 0 8px currentColor}
+  .pcursor .flag{position:absolute;top:-4px;left:6px;font-family:var(--sans);font-size:11px;font-weight:700;
+    color:#0b0e14;padding:2px 8px;border-radius:0 8px 8px 8px;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.4)}
+  .blink{animation:blink 1s steps(1) infinite}
+  @keyframes blink{50%{opacity:.15}}
+
+  /* ---------- Slide 1 : title ---------- */
+  #s1 .hero{width:min(1120px,92vw);text-align:center;transform:translateY(0)}
+  .brandwin{width:min(1120px,92vw)}
+  .glasscode{padding:34px 30px 40px}
+  #s1 h1{font-family:var(--mono);font-weight:800;letter-spacing:-2px;line-height:.98;
+    font-size:clamp(46px,8.6vw,116px);margin:6px 0 2px;
+    background:linear-gradient(120deg,#fff 10%,#c9d4e3 40%,var(--claude) 72%,var(--gemini) 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  #s1 .sub{font-family:var(--mono);font-size:clamp(15px,2.3vw,24px);color:var(--dim);letter-spacing:.5px}
+  #s1 .sub b{color:var(--fg)}
+  .titlecursors{position:absolute;inset:0;pointer-events:none}
+  .rise>*{opacity:0;transform:translateY(26px);animation:rise .8s var(--ease) forwards}
+  .active .rise>*{animation-play-state:running}
+  @keyframes rise{to{opacity:1;transform:none}}
+  .prompt-line{font-family:var(--mono);font-size:clamp(13px,1.9vw,18px);color:var(--codex);margin-top:22px}
+  .prompt-line .pfx{color:var(--muted)}
+
+  /* ---------- headline chip (shared) ---------- */
+  .headline{position:absolute;top:26px;left:0;right:0;text-align:center;z-index:5}
+  .headline .h{font-family:var(--mono);font-weight:700;font-size:clamp(20px,3vw,34px);letter-spacing:-.5px;color:#fff;
+    display:inline-block;padding:6px 4px}
+  .headline .k{color:var(--muted)}
+  .caption{position:absolute;bottom:22px;left:0;right:0;text-align:center;z-index:5;font-family:var(--mono);font-size:clamp(12px,1.7vw,16px)}
+  .caption .cbad{display:inline-block;background:rgba(217,119,87,.12);border:1px solid rgba(217,119,87,.4);color:#f0b49c;
+    padding:7px 16px;border-radius:20px}
+  .capbul{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+  .capbul span{background:var(--panel);border:1px solid var(--line);padding:6px 14px;border-radius:18px;color:var(--dim)}
+  .capbul span b{color:var(--fg);font-weight:600}
+
+  /* strike / loss */
+  .lost{position:relative}
+  .lost::after{content:"";position:absolute;left:16px;right:16px;top:50%;height:2px;background:#ff5f57;transform:scaleX(0);
+    transform-origin:left;box-shadow:0 0 10px #ff5f57}
+  .lost.go::after{animation:strike .35s var(--ease) forwards}
+  @keyframes strike{to{transform:scaleX(1)}}
+  .lost.gone{animation:lossfade .5s .3s var(--ease) forwards}
+  @keyframes lossfade{to{opacity:0;filter:blur(2px);color:#ff5f57}}
+  .savepulse{position:absolute;inset:0;background:radial-gradient(circle at 50% 60%,rgba(45,184,142,.22),transparent 55%);
+    opacity:0;pointer-events:none}
+  .savepulse.go{animation:spulse .7s var(--ease)}
+  @keyframes spulse{0%{opacity:0}30%{opacity:1}100%{opacity:0}}
+  .savetag{position:absolute;z-index:30;font-family:var(--mono);font-weight:700;font-size:12px;color:#0b0e14;background:var(--codex);
+    padding:4px 10px;border-radius:6px;opacity:0;transform:translateY(6px) scale(.9)}
+  .savetag.go{animation:savepop 1.1s var(--ease)}
+  @keyframes savepop{15%{opacity:1;transform:none}70%{opacity:1;transform:none}100%{opacity:0}}
+
+  /* ---------- Slide 3 : split ---------- */
+  #s3 .panes{display:flex;gap:0;width:min(1200px,94vw);height:min(560px,74vh);position:relative}
+  .pane{flex:1;position:relative;transition:transform 1s var(--ease2),opacity .8s var(--ease);border-radius:12px;overflow:hidden;
+    background:linear-gradient(180deg,#0f1521,#0b0f18);border:1px solid var(--line);box-shadow:0 30px 80px -30px rgba(0,0,0,.8)}
+  #s3 .pane.p0{transform:translateX(0);z-index:3}
+  #s3 .pane.p1{opacity:0}
+  #s3 .pane.p2{opacity:0}
+  #s3.active .panes.split .pane.p0{transform:translateX(-6px)}
+  #s3.active .panes.split .pane.p1{opacity:1;transform:translateX(0)}
+  #s3.active .panes.split .pane.p2{opacity:1;transform:translateX(0)}
+  #s3 .panes:not(.split) .pane.p1{transform:translateX(-100%)}
+  #s3 .panes:not(.split) .pane.p2{transform:translateX(-200%)}
+  .panettl{height:30px;display:flex;align-items:center;gap:8px;padding:0 12px;font-family:var(--mono);font-size:11.5px;
+    border-bottom:1px solid var(--line);background:#0a0e15}
+  .panettl .bdot{width:8px;height:8px;border-radius:50%}
+  .gitbar{width:min(1200px,94vw);margin-top:14px;height:56px;border-radius:12px;position:relative;overflow:hidden;
+    background:linear-gradient(90deg,rgba(217,119,87,.10),rgba(45,184,142,.10),rgba(142,124,240,.10));
+    border:1px solid var(--line);display:flex;align-items:center;justify-content:center;gap:14px;
+    font-family:var(--mono);font-size:13px;color:var(--dim);opacity:0;transform:translateY(14px)}
+  #s3.active .gitbar{animation:rise .7s .7s var(--ease) forwards}
+  .gitbar .core{font-weight:700;color:#fff;position:relative}
+  .gitbar .core::before{content:"";position:absolute;inset:-8px -14px;border-radius:14px;
+    background:radial-gradient(closest-side,rgba(255,255,255,.14),transparent);animation:coreglow 2.4s ease-in-out infinite}
+  @keyframes coreglow{50%{opacity:.4}}
+  .link{position:absolute;bottom:0;width:2px;height:14px;background:linear-gradient(var(--c),transparent);opacity:.6}
+  .minicode{padding:10px 12px;font-family:var(--mono);font-size:11px;line-height:1.7;color:var(--dim)}
+  .minicode .ins{color:var(--str)}
+
+  /* ---------- Slide 4 : terminal ---------- */
+  .term{position:absolute;left:0;right:0;bottom:0;background:#070a10;border-top:1px solid var(--line);
+    height:0;overflow:hidden;transition:height .7s var(--ease2)}
+  .active .term.up{height:150px}
+  .termhead{height:26px;display:flex;align-items:center;gap:14px;padding:0 12px;font-family:var(--mono);font-size:10.5px;color:var(--muted);border-bottom:1px solid var(--line)}
+  .termhead .t{color:var(--fg)}
+  .termbody{padding:10px 14px;font-family:var(--mono);font-size:12.5px;line-height:1.8}
+  .termbody .p1{color:var(--codex)}.termbody .p2{color:var(--accent)}
+  .tcur{display:inline-block;width:9px;height:15px;background:var(--fg);vertical-align:-2px;margin-left:2px}
+
+  /* ---------- Slide 5 : merge ---------- */
+  #s5 .mstage{width:min(1180px,94vw);height:min(560px,74vh);position:relative}
+  #s5 .mpane{position:absolute;top:8%;width:30%;height:70%;border-radius:12px;overflow:hidden;
+    background:linear-gradient(180deg,#0f1521,#0b0f18);border:1px solid var(--line);
+    transition:transform 1.1s var(--ease2),opacity .8s var(--ease);box-shadow:0 30px 80px -30px rgba(0,0,0,.8)}
+  #s5 .mpane.m0{left:2%}
+  #s5 .mpane.m1{left:35%}
+  #s5 .mpane.m2{left:68%}
+  #s5.active .mstage.conv .mpane{left:35%;top:8%;opacity:.0}
+  #s5.active .mstage.conv .mpane.m1{opacity:1}
+  .mergebadge{position:absolute;left:50%;top:52%;transform:translate(-50%,-50%) scale(.4);opacity:0;z-index:10;
+    font-family:var(--mono);font-weight:800;font-size:clamp(18px,3vw,30px);color:#0b0e14;background:var(--codex);
+    padding:14px 26px;border-radius:16px;box-shadow:0 0 50px rgba(45,184,142,.6);white-space:nowrap}
+  #s5.active .mstage.conv .mergebadge{animation:mergepop .7s 1s var(--ease) forwards}
+  @keyframes mergepop{to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+  .trunk{position:absolute;left:50%;top:0;bottom:0;width:3px;transform:translateX(-50%);
+    background:linear-gradient(var(--claude),var(--codex),var(--gemini));opacity:0}
+  #s5.active .mstage.conv .trunk{animation:rise .8s .4s var(--ease) forwards}
+  svg.branches{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+  svg.branches path{fill:none;stroke-width:2.4;stroke-linecap:round;
+    stroke-dasharray:600;stroke-dashoffset:600}
+  #s5.active .mstage.conv svg.branches path{animation:draw 1.1s .2s var(--ease) forwards}
+  @keyframes draw{to{stroke-dashoffset:0}}
+  .cnode{position:absolute;width:16px;height:16px;border-radius:50%;transform:translate(-50%,-50%) scale(0);
+    box-shadow:0 0 14px currentColor}
+  #s5.active .mstage.conv .cnode{animation:pop .5s var(--ease) forwards}
+  #s5.active .mstage.conv .cnode.c0{animation-delay:.2s}
+  #s5.active .mstage.conv .cnode.c1{animation-delay:.4s}
+  #s5.active .mstage.conv .cnode.c2{animation-delay:.6s}
+  #s5.active .mstage.conv .cnode.cm{animation-delay:1s}
+  @keyframes pop{to{transform:translate(-50%,-50%) scale(1)}}
+
+  /* progress dots */
+  #prog{position:fixed;bottom:16px;right:18px;z-index:100;display:flex;gap:9px;align-items:center;
+    font-family:var(--mono);font-size:11px;color:var(--muted)}
+  #prog .pd{width:9px;height:9px;border-radius:50%;background:#28313f;transition:all .4s var(--ease)}
+  #prog .pd.on{background:var(--claude);box-shadow:0 0 10px var(--claude);width:22px;border-radius:6px}
+  #hint{position:fixed;bottom:16px;left:18px;z-index:100;font-family:var(--mono);font-size:10.5px;color:#3b4657}
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation-duration:.001s!important;transition-duration:.001s!important}
+    .blink{animation:none}
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <!-- ===== SLIDE 1 : TITLE ===== -->
+  <section class="slide" id="s1">
+    <div class="win brandwin">
+      <div class="titlebar">
+        <div class="lights"><i></i><i></i><i></i></div>
+        <span class="winttl">worktrees — main</span>
+        <div class="presence-top">
+          <div class="avatar" style="background:var(--claude)">C</div>
+          <div class="avatar" style="background:var(--codex)">Co</div>
+          <div class="avatar" style="background:var(--gemini)">G</div>
+        </div>
+      </div>
+      <div class="tabstrip">
+        <div class="tab on"><span class="dot" style="background:var(--accent)"></span>README.md</div>
+        <div class="tab"><span class="dot" style="background:var(--claude)"></span>auth.ts</div>
+        <div class="tab"><span class="dot" style="background:var(--codex)"></span>api.ts</div>
+      </div>
+      <div class="glasscode rise" style="position:relative">
+        <div class="hero">
+          <div class="sub" style="margin-bottom:6px">// a lightning talk</div>
+          <h1>Git Worktrees</h1>
+          <div class="sub">One Repo, <b>N&nbsp;Coding&nbsp;Agents</b></div>
+          <div class="prompt-line"><span class="pfx">$</span> git worktree add &nbsp;·&nbsp; <span class="pfx">$</span> claude&nbsp;-w</div>
+        </div>
+        <div class="titlecursors" id="tc"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SLIDE 2 : COLLISION ===== -->
+  <section class="slide" id="s2">
+    <div class="headline"><span class="h"><span class="k">N</span> agents, one directory</span></div>
+    <div class="win" style="width:min(980px,90vw)">
+      <div class="titlebar">
+        <div class="lights"><i></i><i></i><i></i></div>
+        <span class="winttl">~/project — 3 editing</span>
+        <div class="presence-top">
+          <div class="avatar" style="background:var(--claude)">C</div>
+          <div class="avatar" style="background:var(--codex)">Co</div>
+          <div class="avatar" style="background:var(--gemini)">G</div>
+        </div>
+      </div>
+      <div class="tabstrip">
+        <div class="tab on"><span class="dot" style="background:var(--claude)"></span>auth.ts</div>
+        <div class="tab"><span class="dot" style="background:#334"></span>index.ts</div>
+      </div>
+      <div class="body">
+        <div class="sidebar">
+          <div class="stree">
+            <div class="row"><span class="ico">▾</span> src</div>
+            <div class="row sel" style="padding-left:20px"><span class="ico">◆</span> auth.ts</div>
+            <div class="row f" style="padding-left:20px"><span class="ico">◇</span> api.ts</div>
+            <div class="row f" style="padding-left:20px"><span class="ico">◇</span> ui.tsx</div>
+            <div class="row" style="padding-left:20px"><span class="ico">◇</span> index.ts</div>
+          </div>
+        </div>
+        <div class="code" id="s2code" style="min-height:300px;position:relative">
+          <div class="savepulse" id="s2pulse"></div>
+          <div class="cl"><span class="gutter">1</span><span class="kw">export function</span> <span class="fn">&nbsp;login</span><span class="pu">(</span><span class="va">u</span><span class="pu">,</span> <span class="va">p</span><span class="pu">) {</span></div>
+          <div class="cl" id="l2"><span class="gutter">2</span><span class="pu">&nbsp;&nbsp;</span><span class="com" id="l2c"></span></div>
+          <div class="cl lost" id="lA"><span class="gutter">3</span><span class="pu">&nbsp;&nbsp;</span><span id="lAc"></span></div>
+          <div class="cl lost" id="lB"><span class="gutter">4</span><span class="pu">&nbsp;&nbsp;</span><span id="lBc"></span></div>
+          <div class="cl" id="lS"><span class="gutter">5</span><span class="pu">&nbsp;&nbsp;</span><span id="lSc"></span></div>
+          <div class="cl"><span class="gutter">6</span><span class="pu">}</span></div>
+          <div class="savetag" id="s2save">● saved · Codex</div>
+        </div>
+      </div>
+    </div>
+    <div class="caption"><span class="cbad">No error. No conflict. Just missing code.</span></div>
+  </section>
+
+  <!-- ===== SLIDE 3 : SPLIT ===== -->
+  <section class="slide" id="s3">
+    <div class="headline"><span class="h">One repo <span class="k">→</span> N working trees</span></div>
+    <div style="display:flex;flex-direction:column;align-items:center;margin-top:18px">
+      <div class="panes" id="s3panes"></div>
+      <div class="gitbar">
+        <span class="link" style="left:16.6%;--c:var(--claude)"></span>
+        <span class="link" style="left:50%;--c:var(--codex)"></span>
+        <span class="link" style="left:83.3%;--c:var(--gemini)"></span>
+        <span class="core">.git</span> — shared object DB + refs
+      </div>
+    </div>
+    <div class="caption capbul">
+      <span><b>Shared object DB + refs</b> — no re-clone</span>
+      <span><b>Per-worktree HEAD</b> + index</span>
+    </div>
+  </section>
+
+  <!-- ===== SLIDE 4 : WIRING ===== -->
+  <section class="slide" id="s4">
+    <div class="headline"><span class="h">Wiring up the agents</span></div>
+    <div class="win" style="width:min(1040px,92vw);position:relative">
+      <div class="titlebar">
+        <div class="lights"><i></i><i></i><i></i></div>
+        <span class="winttl">3 worktrees — parallel</span>
+        <div class="presence-top">
+          <div class="avatar" style="background:var(--claude)">C</div>
+          <div class="avatar" style="background:var(--codex)">Co</div>
+          <div class="avatar" style="background:var(--gemini)">G</div>
+        </div>
+      </div>
+      <div class="tabstrip">
+        <div class="tab on"><span class="dot" style="background:var(--claude)"></span>feat/auth</div>
+        <div class="tab"><span class="dot" style="background:var(--codex)"></span>feat/api</div>
+        <div class="tab"><span class="dot" style="background:var(--gemini)"></span>feat/ui</div>
+      </div>
+      <div class="body">
+        <div class="sidebar">
+          <div class="stree" id="s4gutter">
+            <div class="row f"><span class="ico" style="color:var(--claude)">●</span> ../auth</div>
+            <div class="row f"><span class="ico" style="color:var(--codex)">●</span> ../api</div>
+            <div class="row f"><span class="ico" style="color:var(--gemini)">●</span> ../ui</div>
+            <div class="row" style="margin-top:10px;color:#3b4657">— commits —</div>
+            <div id="s4commits" style="position:relative;height:120px;margin-top:6px"></div>
+          </div>
+        </div>
+        <div class="code" style="min-height:230px;padding-bottom:150px">
+          <div class="cl"><span class="gutter">1</span><span class="com"># one command per agent — private tree</span></div>
+          <div class="cl"><span class="gutter">2</span></div>
+          <div class="cl"><span class="gutter">3</span><span class="va" id="ln3"></span></div>
+          <div class="cl"><span class="gutter">4</span><span class="va" id="ln4"></span></div>
+        </div>
+      </div>
+      <div class="term up" id="s4term">
+        <div class="termhead"><span class="t">TERMINAL</span> · zsh · ~/project</div>
+        <div class="termbody">
+          <div><span class="p1">➜ auth</span> <span id="t1"></span></div>
+          <div><span class="p2">➜ launch</span> <span id="t2"></span><span class="tcur blink" id="tcur"></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="caption capbul">
+      <span><b>Private index</b> — no .git/index.lock fights</span>
+      <span>Silent overwrites <b>→ real merge conflicts</b></span>
+    </div>
+  </section>
+
+  <!-- ===== SLIDE 5 : MERGE ===== -->
+  <section class="slide" id="s5">
+    <div class="headline"><span class="h">Merging it all back</span></div>
+    <div class="mstage" id="s5stage">
+      <svg class="branches" viewBox="0 0 1000 500" preserveAspectRatio="none">
+        <path d="M120,90 C300,90 400,250 500,250" stroke="var(--claude)"/>
+        <path d="M500,90 L500,250" stroke="var(--codex)"/>
+        <path d="M880,90 C700,90 600,250 500,250" stroke="var(--gemini)"/>
+        <path d="M500,250 L500,470" stroke="var(--codex)"/>
+      </svg>
+      <div class="trunk"></div>
+      <div class="mpane m0">
+        <div class="panettl"><span class="bdot" style="background:var(--claude)"></span>feat/auth</div>
+        <div class="minicode"><span class="com">+ session guard</span><br><span class="str">+ jwt verify</span></div>
+      </div>
+      <div class="mpane m1">
+        <div class="panettl"><span class="bdot" style="background:var(--codex)"></span>feat/api</div>
+        <div class="minicode"><span class="com">+ /v2 routes</span><br><span class="str">+ rate limit</span></div>
+      </div>
+      <div class="mpane m2">
+        <div class="panettl"><span class="bdot" style="background:var(--gemini)"></span>feat/ui</div>
+        <div class="minicode"><span class="com">+ dashboard</span><br><span class="str">+ dark mode</span></div>
+      </div>
+      <div class="cnode c0" style="left:12%;top:18%;background:var(--claude);color:var(--claude)"></div>
+      <div class="cnode c1" style="left:50%;top:18%;background:var(--codex);color:var(--codex)"></div>
+      <div class="cnode c2" style="left:88%;top:18%;background:var(--gemini);color:var(--gemini)"></div>
+      <div class="cnode cm" style="left:50%;top:50%;background:#fff;color:#fff"></div>
+      <div class="mergebadge">merged ✓</div>
+    </div>
+    <div class="caption capbul"><span>Small PRs <b>→</b> stacked <b>→</b> merge queue</span></div>
+  </section>
+
+</div>
+
+<div id="prog"></div>
+<div id="hint">← → / space / click · press 1·2·3</div>
+
+<script>
+(function(){
+  "use strict";
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var total = slides.length;
+  var idx = 0;
+  var timers = [];
+  function clearTimers(){ timers.forEach(clearTimeout); timers = []; }
+  function later(fn,ms){ timers.push(setTimeout(fn, reduce?Math.min(ms,60):ms)); }
+
+  // progress dots
+  var prog = document.getElementById('prog');
+  var dots = [];
+  for(var i=0;i<total;i++){
+    var d=document.createElement('span'); d.className='pd'; prog.appendChild(d); dots.push(d);
+  }
+  var counter=document.createElement('span'); prog.appendChild(counter);
+
+  function typeInto(el, text, speed, done){
+    el.textContent='';
+    var j=0;
+    (function step(){
+      if(j>text.length){ done&&done(); return; }
+      el.textContent=text.slice(0,j); j++;
+      later(step, speed);
+    })();
+  }
+
+  // ---- presence cursor factory ----
+  function makeCursor(color,name){
+    var c=document.createElement('div'); c.className='pcursor';
+    var caret=document.createElement('div'); caret.className='caret blink'; caret.style.background=color; caret.style.color=color;
+    var flag=document.createElement('div'); flag.className='flag'; flag.style.background=color; flag.textContent=name;
+    c.appendChild(caret); c.appendChild(flag); c.style.color=color;
+    return c;
+  }
+  function moveCursor(c,x,y){ c.style.transform='translate('+x+'px,'+y+'px)'; }
+
+  // ================= SLIDE 1 anim =================
+  var s1cursors=[];
+  (function initS1(){
+    var wrap=document.getElementById('tc');
+    var a=[['var(--claude)','Claude',80,30],['var(--codex)','Codex',260,150],['var(--gemini)','Gemini',540,80]];
+    a.forEach(function(v){ var c=makeCursor(getComputedStyle(document.documentElement).getPropertyValue(v[0])||v[0],v[1]);
+      c.dataset.x=v[2]; c.dataset.y=v[3]; wrap.appendChild(c); s1cursors.push(c); });
+  })();
+  function runS1(){
+    var W=document.getElementById('tc').clientWidth||900;
+    var H=document.getElementById('tc').clientHeight||260;
+    s1cursors.forEach(function(c,i){
+      moveCursor(c, W*0.5, H*0.5); // start center
+      later(function(){
+        var pts=[[W*0.18,H*0.22],[W*0.55,H*0.62],[W*0.80,H*0.30]][i];
+        moveCursor(c,pts[0],pts[1]);
+      }, 300+i*260);
+      // idle drift
+      var drift=0;
+      function wander(){
+        if(idx!==0) return;
+        var pts=[[W*0.18,H*0.22],[W*0.55,H*0.62],[W*0.80,H*0.30]][i];
+        drift=(drift+1)%2;
+        moveCursor(c, pts[0]+(drift?40:-30), pts[1]+(drift?-18:22));
+        later(wander,1800+i*400);
+      }
+      later(wander,1400+i*400);
+    });
+  }
+
+  // ================= SLIDE 2 anim =================
+  var s2cursors=null;
+  function runS2(){
+    var code=document.getElementById('s2code');
+    if(!s2cursors){
+      s2cursors={};
+      ['claude','codex','gemini'].forEach(function(k){
+        var col=getComputedStyle(document.documentElement).getPropertyValue('--'+k);
+        var name=k[0].toUpperCase()+k.slice(1);
+        var c=makeCursor(col,name); code.appendChild(c); s2cursors[k]=c;
+      });
+    }
+    // reset
+    document.getElementById('l2c').textContent='';
+    var lA=document.getElementById('lA'), lB=document.getElementById('lB'), lS=document.getElementById('lS');
+    [lA,lB,lS].forEach(function(l){l.classList.remove('go','gone');l.style.opacity='';l.style.filter='';l.style.color='';});
+    document.getElementById('lAc').textContent=''; document.getElementById('lBc').textContent=''; document.getElementById('lSc').textContent='';
+    document.getElementById('s2save').classList.remove('go');
+    document.getElementById('s2pulse').classList.remove('go');
+
+    var lineY=[0,26,52,78,104,130]; // approx line offsets
+    var baseX=54;
+    function put(c,li,ch){ moveCursor(c, baseX+ch*7.6, 12+lineY[li]); }
+
+    // all three crowd toward line 3/4/5, same file
+    put(s2cursors.claude,2,4); put(s2cursors.codex,3,4); put(s2cursors.gemini,4,4);
+    later(function(){
+      // claude types line 3
+      var A=document.getElementById('lAc');
+      typeInto(A,'const token = signJWT(u); // Claude',34,function(){});
+      var i=0; (function t(){ if(i<=32){ put(s2cursors.claude,2,4+i); i+=2; later(t,60);} })();
+    },500);
+    later(function(){
+      var B=document.getElementById('lBc');
+      typeInto(B,'audit.log(u, Date.now()); // Gemini',34);
+      var i=0; (function t(){ if(i<=32){ put(s2cursors.gemini,3,4+i); i+=2; later(t,60);} })();
+    },900);
+    later(function(){
+      var S=document.getElementById('lSc');
+      typeInto(S,'return session(u); // Codex',34);
+      var i=0; (function t(){ if(i<=24){ put(s2cursors.codex,4,4+i); i+=2; later(t,60);} })();
+    },1300);
+    // Codex saves -> last write wins
+    later(function(){
+      var save=document.getElementById('s2save');
+      save.style.right='16px'; save.style.top='150px';
+      save.classList.add('go');
+      document.getElementById('s2pulse').classList.add('go');
+    },2600);
+    // the others' lines get struck & deleted (silent loss)
+    later(function(){ lA.classList.add('go'); lB.classList.add('go'); },3100);
+    later(function(){ lA.classList.add('gone'); lB.classList.add('gone'); },3450);
+  }
+
+  // ================= SLIDE 3 build panes =================
+  (function buildS3(){
+    var panes=document.getElementById('s3panes');
+    var data=[['claude','feat/auth','auth.ts','signJWT(u)'],
+              ['codex','feat/api','api.ts','router.get()'],
+              ['gemini','feat/ui','ui.tsx','<Dashboard/>']];
+    data.forEach(function(d,i){
+      var col=getComputedStyle(document.documentElement).getPropertyValue('--'+d[0]);
+      var p=document.createElement('div'); p.className='pane p'+i;
+      p.innerHTML='<div class="panettl"><span class="bdot" style="background:'+col+'"></span>'+d[1]+
+        '</div><div class="tabstrip" style="height:28px"><div class="tab on" style="font-size:10.5px"><span class="dot" style="background:'+col+'"></span>'+d[2]+'</div></div>'+
+        '<div class="minicode"><span class="com">// worktree · '+d[1]+'</span><br>'+
+        '<span class="kw">export</span> <span class="fn">'+d[3]+'</span><br><span class="ins">+ isolated HEAD</span><br><span class="ins">+ own index</span></div>';
+      panes.appendChild(p);
+      var cur=makeCursor(col, d[0][0].toUpperCase()+d[0].slice(1));
+      cur.style.transition='transform .6s var(--ease2)';
+      cur.dataset.k=i; p.appendChild(cur);
+      cur._pane=p;
+    });
+  })();
+  function runS3(){
+    var panes=document.getElementById('s3panes');
+    panes.classList.remove('split');
+    // force reflow then split
+    void panes.offsetWidth;
+    later(function(){ panes.classList.add('split'); },260);
+    // animate each pane cursor
+    Array.prototype.forEach.call(panes.querySelectorAll('.pcursor'),function(cur,i){
+      moveCursor(cur,40,60);
+      later(function(){ moveCursor(cur, 40+Math.random()*40, 70+Math.random()*30); },900+i*160);
+      later(function(){ moveCursor(cur, 60, 100); },1800+i*200);
+    });
+  }
+
+  // ================= SLIDE 4 anim =================
+  var s4done=false;
+  function runS4(){
+    var term=document.getElementById('s4term');
+    term.classList.remove('up'); void term.offsetWidth;
+    document.getElementById('t1').textContent='';
+    document.getElementById('t2').textContent='';
+    document.getElementById('ln3').textContent='';
+    document.getElementById('ln4').textContent='';
+    var cm=document.getElementById('s4commits'); cm.innerHTML='';
+    later(function(){ term.classList.add('up'); },200);
+    later(function(){
+      typeInto(document.getElementById('t1'),'git worktree add -b feat/auth ../auth main',36,function(){
+        document.getElementById('ln3').textContent='git worktree add -b feat/auth ../auth main';
+        later(function(){
+          typeInto(document.getElementById('t2'),'claude -w feature-auth',46,function(){
+            document.getElementById('ln4').textContent='claude -w feature-auth';
+            streamCommits();
+          });
+        },300);
+      });
+    },700);
+    function streamCommits(){
+      var cm=document.getElementById('s4commits');
+      var cols=['--claude','--codex','--gemini'];
+      var lanes=[14,58,102];
+      for(var lane=0;lane<3;lane++){
+        (function(lane){
+          for(var k=0;k<4;k++){
+            later(function(){
+              var col=getComputedStyle(document.documentElement).getPropertyValue(cols[lane]);
+              var d=document.createElement('span');
+              d.style.cssText='position:absolute;left:'+lanes[lane]+'px;width:9px;height:9px;border-radius:50%;background:'+col+';box-shadow:0 0 8px '+col+';opacity:0;transition:all .4s var(--ease)';
+              cm.appendChild(d);
+              var y=cm._y=cm._y||{}; y[lane]=(y[lane]||0);
+              d.style.top=(6+y[lane]*24)+'px'; y[lane]++;
+              void d.offsetWidth; d.style.opacity='1'; d.style.transform='translateY(0)';
+            }, 300 + lane*120 + k*380);
+          }
+        })(lane);
+      }
+    }
+  }
+
+  // ================= SLIDE 5 anim =================
+  function runS5(){
+    var st=document.getElementById('s5stage');
+    st.classList.remove('conv'); void st.offsetWidth;
+    later(function(){ st.classList.add('conv'); },300);
+  }
+
+  // ================= navigation =================
+  var runners=[runS1,runS2,runS3,runS4,runS5];
+  function show(n){
+    n=Math.max(0,Math.min(total-1,n));
+    idx=n; clearTimers();
+    slides.forEach(function(s,i){ s.classList.toggle('active', i===n); });
+    dots.forEach(function(d,i){ d.classList.toggle('on', i===n); });
+    counter.textContent=(n+1)+' / '+total;
+    // restart entrance: re-trigger CSS animations by reflow on active slide's rise els
+    var active=slides[n];
+    Array.prototype.forEach.call(active.querySelectorAll('.rise'),function(r){
+      r.style.animation='none'; void r.offsetWidth; r.style.animation='';
+    });
+    later(function(){ runners[n] && runners[n](); }, 120);
+  }
+  function next(){ if(idx<total-1) show(idx+1); }
+  function prev(){ if(idx>0) show(idx-1); }
+
+  document.getElementById('stage').addEventListener('click', next);
+  window.addEventListener('keydown', function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='Spacebar'){ e.preventDefault(); next(); }
+    else if(e.key==='ArrowLeft'){ e.preventDefault(); prev(); }
+    else if(e.key==='1'||e.key==='2'||e.key==='3'){
+      try{ window.parent.postMessage({type:'switchVariant', key:({'1':'a','2':'b','3':'c'})[e.key]}, '*'); }catch(err){}
+    }
+  });
+
+  show(0);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<!-- PROTOTYPE — throwaway aesthetic comparison, delete after decision. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Git Worktrees — Living Git Graph</title>
+<style>
+  :root{
+    --claude:#D97757;
+    --codex:#2DB88E;
+    --gemini:#8E7CF0;
+    --bg:#0a0d12;
+    --bg2:#0e1219;
+    --ink:#e8ecf2;
+    --muted:#8792a3;
+    --line:#26303d;
+    --red:#e8534e;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: "SF Mono", "JetBrains Mono", "Fira Code", ui-monospace, Menlo, Consolas, monospace;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%; width:100%; overflow:hidden; background:var(--bg); color:var(--ink); font-family:var(--sans);}
+  #stage{
+    position:fixed; inset:0; overflow:hidden;
+    background:
+      radial-gradient(ellipse 120% 90% at 50% 40%, #121824 0%, var(--bg) 60%, #05070a 100%);
+    cursor:pointer;
+  }
+  /* subtle grid + vignette */
+  #stage::before{
+    content:""; position:absolute; inset:0; pointer-events:none;
+    background-image:
+      linear-gradient(rgba(120,150,200,.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(120,150,200,.035) 1px, transparent 1px);
+    background-size:44px 44px;
+    mask-image:radial-gradient(ellipse 80% 80% at 50% 45%, #000 30%, transparent 85%);
+  }
+  #stage::after{
+    content:""; position:absolute; inset:0; pointer-events:none;
+    box-shadow: inset 0 0 260px 40px rgba(0,0,0,.65);
+  }
+
+  .slide{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    opacity:0; visibility:hidden;
+    transition:opacity .5s ease;
+    padding:4vh 5vw;
+  }
+  .slide.active{opacity:1; visibility:visible;}
+
+  svg.graph{position:absolute; inset:0; width:100%; height:100%; overflow:visible;}
+
+  /* text blocks */
+  .headline{
+    font-size:clamp(20px, 3.4vw, 46px);
+    font-weight:650; letter-spacing:-.02em;
+    text-align:center; line-height:1.05;
+  }
+  .sub{ color:var(--muted); font-size:clamp(13px,1.5vw,20px); margin-top:.6em; text-align:center;}
+  .caption{ color:var(--muted); font-size:clamp(12px,1.35vw,17px); text-align:center;}
+  .mono{ font-family:var(--mono); }
+
+  /* entrance helpers */
+  .rise{ opacity:0; transform:translateY(16px); }
+  .active .rise{ animation:rise .7s cubic-bezier(.16,1,.3,1) forwards; }
+  @keyframes rise{ to{opacity:1; transform:none;} }
+
+  .fade{ opacity:0; }
+  .active .fade{ animation:fade .8s ease forwards; }
+  @keyframes fade{ to{opacity:1;} }
+
+  /* ===== Slide 1 : TITLE ===== */
+  #s1 .title{
+    font-size:clamp(40px, 9vw, 120px);
+    font-weight:750; letter-spacing:-.04em; line-height:.95;
+    background:linear-gradient(120deg,var(--claude),var(--gemini) 55%,var(--codex));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-align:center;
+  }
+  #s1 .sub{ font-size:clamp(14px,2vw,26px); color:var(--ink); opacity:.85; letter-spacing:.02em;}
+  #s1 .kicker{
+    font-family:var(--mono); font-size:clamp(11px,1.3vw,15px); letter-spacing:.28em;
+    text-transform:uppercase; color:var(--muted); margin-bottom:1.4em;
+  }
+
+  /* ===== labels / chips ===== */
+  .brlabel{ font-family:var(--mono); font-size:13px; font-weight:600; }
+  .agentchip{
+    display:inline-flex; align-items:center; gap:.5em;
+    font-family:var(--mono); font-size:13px; padding:.28em .7em;
+    border-radius:999px; border:1px solid var(--line); background:rgba(255,255,255,.02);
+  }
+  .dot{ width:9px; height:9px; border-radius:50%; display:inline-block; }
+
+  /* command card */
+  .cmd{
+    font-family:var(--mono); font-size:clamp(12px,1.35vw,16px);
+    background:rgba(10,14,20,.72); border:1px solid var(--line); border-radius:12px;
+    padding:16px 20px; line-height:1.9; text-align:left;
+    box-shadow:0 20px 60px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.03);
+    backdrop-filter:blur(4px);
+  }
+  .cmd .p{ color:var(--codex); } .cmd .f{ color:var(--gemini); } .cmd .c{ color:var(--claude); }
+  .cmd .g{ color:var(--muted); }
+
+  .bullets{ list-style:none; display:flex; flex-direction:column; gap:.55em; }
+  .bullets li{ display:flex; align-items:center; gap:.6em; color:var(--muted); font-size:clamp(12px,1.35vw,16px);}
+  .bullets li::before{ content:""; width:6px; height:6px; border-radius:50%; background:var(--claude); flex:none; box-shadow:0 0 8px var(--claude);}
+
+  /* progress */
+  #progress{
+    position:fixed; right:20px; bottom:18px; z-index:50;
+    display:flex; align-items:center; gap:9px;
+    font-family:var(--mono); font-size:12px; color:var(--muted);
+  }
+  #progress .dots{ display:flex; gap:7px; }
+  #progress i{ width:8px; height:8px; border-radius:50%; background:#2b3644; transition:all .35s ease; display:block;}
+  #progress i.on{ background:var(--ink); box-shadow:0 0 10px rgba(232,236,242,.6); transform:scale(1.15);}
+
+  #hint{
+    position:fixed; left:20px; bottom:18px; z-index:50;
+    font-family:var(--mono); font-size:11px; color:#4a5563; letter-spacing:.04em;
+  }
+  kbd{ font-family:var(--mono); border:1px solid var(--line); border-radius:5px; padding:0 5px; color:var(--muted);}
+
+  /* SVG node glow filter target via CSS */
+  circle.node{ filter:drop-shadow(0 0 6px currentColor); }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:.001s !important; transition-duration:.12s !important; }
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <!-- ================= SLIDE 1 : TITLE ================= -->
+  <section class="slide" id="s1">
+    <svg class="graph" id="g1" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice"></svg>
+    <div style="position:relative; z-index:2; display:flex; flex-direction:column; align-items:center;">
+      <div class="kicker rise" style="animation-delay:.05s">git worktree · lightning talk</div>
+      <div class="title rise" style="animation-delay:.15s">Git Worktrees</div>
+      <div class="sub rise" style="animation-delay:.4s">One Repo, <b>N</b> Coding Agents</div>
+      <div class="rise" style="animation-delay:.7s; margin-top:2.4em; display:flex; gap:12px;">
+        <span class="agentchip"><span class="dot" style="background:var(--claude)"></span>Claude</span>
+        <span class="agentchip"><span class="dot" style="background:var(--codex)"></span>Codex</span>
+        <span class="agentchip"><span class="dot" style="background:var(--gemini)"></span>Gemini</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SLIDE 2 : COLLISION ================= -->
+  <section class="slide" id="s2">
+    <svg class="graph" id="g2" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice"></svg>
+    <div style="position:relative; z-index:2; text-align:center; margin-top:-30vh;">
+      <div class="headline rise"><b>N</b> agents, one directory</div>
+      <div class="sub rise" style="animation-delay:.15s">Same working tree · everyone edits in place · last write wins</div>
+    </div>
+    <div style="position:relative; z-index:2; margin-top:auto; margin-bottom:4vh; text-align:center;">
+      <div class="caption rise" id="s2cap" style="animation-delay:1.9s; font-size:clamp(14px,1.8vw,22px); color:var(--red); font-weight:600;">
+        No error. No conflict. Just missing code.
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SLIDE 3 : THE SPLIT ================= -->
+  <section class="slide" id="s3">
+    <svg class="graph" id="g3" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice"></svg>
+    <div style="position:relative; z-index:2; text-align:center; margin-top:-34vh;">
+      <div class="headline rise">One repo <span style="color:var(--muted)">→</span> <b>N</b> working trees</div>
+    </div>
+    <div style="position:relative; z-index:2; margin-top:auto; margin-bottom:4vh;">
+      <ul class="bullets fade" style="animation-delay:2.6s; align-items:center;">
+        <li>Shared object DB + refs — no re-clone</li>
+        <li>Per-worktree HEAD + index</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================= SLIDE 4 : WIRING ================= -->
+  <section class="slide" id="s4">
+    <svg class="graph" id="g4" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice"></svg>
+    <div style="position:relative; z-index:2; text-align:center; margin-top:-34vh;">
+      <div class="headline rise">Wiring up the agents</div>
+    </div>
+    <div style="position:relative; z-index:2; margin-top:auto; margin-bottom:4vh; display:flex; flex-direction:column; align-items:center; gap:1.3em;">
+      <div class="cmd rise" style="animation-delay:.5s">
+        <div><span class="g">$</span> git worktree add <span class="f">-b feat/auth</span> <span class="g">../auth</span> main</div>
+        <div><span class="g">$</span> <span class="c">claude</span> -w feature-auth</div>
+      </div>
+      <ul class="bullets fade" style="animation-delay:1.2s; align-items:center;">
+        <li>Private index → no <span class="mono">.git/index.lock</span> fights</li>
+        <li>Silent overwrites become real merge conflicts</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================= SLIDE 5 : MERGE ================= -->
+  <section class="slide" id="s5">
+    <svg class="graph" id="g5" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice"></svg>
+    <div style="position:relative; z-index:2; text-align:center; margin-top:-34vh;">
+      <div class="headline rise">Merging it all back</div>
+    </div>
+    <div style="position:relative; z-index:2; margin-top:auto; margin-bottom:5vh;">
+      <div class="caption fade mono" style="animation-delay:2.4s; font-size:clamp(13px,1.6vw,19px); color:var(--codex);">
+        Small PRs → stacked → merge queue
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div id="progress"><span class="dots"></span><span id="count">1 / 5</span></div>
+<div id="hint"><kbd>→</kbd> next · <kbd>←</kbd> back · <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> variants</div>
+
+<script>
+"use strict";
+const SVGNS="http://www.w3.org/2000/svg";
+const COL={claude:"#D97757",codex:"#2DB88E",gemini:"#8E7CF0",trunk:"#5b6b80",red:"#e8534e"};
+const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function el(tag, attrs){ const e=document.createElementNS(SVGNS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); return e; }
+
+/* ---------- reusable graph primitives ---------- */
+function node(svg,x,y,color,r){
+  r=r||11;
+  const g=el("g",{});
+  const halo=el("circle",{cx:x,cy:y,r:r+8,fill:color,opacity:.0});
+  halo.style.mixBlendMode="screen";
+  const c=el("circle",{cx:x,cy:y,r:r,fill:"#0a0d12",stroke:color,"stroke-width":3});
+  c.setAttribute("class","node"); c.style.color=color;
+  g.appendChild(halo); g.appendChild(c);
+  svg.appendChild(g);
+  return {g,c,halo,x,y,color};
+}
+function popNode(n,delay){
+  if(reduce){ n.c.style.opacity=1; return; }
+  n.c.style.transformOrigin=`${n.x}px ${n.y}px`;
+  n.c.style.transform="scale(0)"; n.c.style.opacity="0";
+  n.c.animate([
+    {transform:"scale(0)",opacity:0},
+    {transform:"scale(1.35)",opacity:1,offset:.65},
+    {transform:"scale(1)",opacity:1}
+  ],{duration:520,delay:delay,easing:"cubic-bezier(.34,1.56,.64,1)",fill:"both"});
+  n.halo.animate([
+    {opacity:0},{opacity:.5,offset:.5},{opacity:0}
+  ],{duration:900,delay:delay,fill:"both"});
+}
+function drawPath(svg,d,color,w,delay,dur){
+  const p=el("path",{d:d,fill:"none",stroke:color,"stroke-width":w||3.5,"stroke-linecap":"round"});
+  p.style.filter=`drop-shadow(0 0 5px ${color}66)`;
+  svg.appendChild(p);
+  const len=p.getTotalLength();
+  if(reduce){ return p; }
+  p.style.strokeDasharray=len; p.style.strokeDashoffset=len;
+  p.animate([{strokeDashoffset:len},{strokeDashoffset:0}],
+    {duration:dur||900,delay:delay||0,easing:"cubic-bezier(.65,0,.35,1)",fill:"both"});
+  return p;
+}
+function label(svg,x,y,text,color,delay,anchor){
+  const t=el("text",{x:x,y:y,fill:color,"font-family":'"SF Mono",ui-monospace,Menlo,monospace',
+    "font-size":22,"font-weight":600,"text-anchor":anchor||"start"});
+  t.textContent=text; svg.appendChild(t);
+  if(!reduce){ t.style.opacity=0; t.animate([{opacity:0,transform:"translateX(-8px)"},{opacity:1,transform:"none"}],
+    {duration:600,delay:delay,easing:"ease-out",fill:"both"}); }
+  return t;
+}
+function clear(svg){ while(svg.firstChild) svg.removeChild(svg.firstChild); }
+
+/* ---------- background floating commit nodes (title) ---------- */
+function buildTitle(){
+  const svg=document.getElementById("g1"); clear(svg);
+  // faint trunk with drifting nodes across the backdrop
+  const cols=[COL.claude,COL.codex,COL.gemini];
+  for(let i=0;i<26;i++){
+    const x=Math.random()*1600, y=Math.random()*1000;
+    const c=el("circle",{cx:x,cy:y,r:2+Math.random()*3,fill:cols[i%3],opacity:.0});
+    c.style.filter="drop-shadow(0 0 4px "+cols[i%3]+")";
+    svg.appendChild(c);
+    if(!reduce) c.animate([{opacity:0},{opacity:.35+Math.random()*.3},{opacity:.1}],
+      {duration:2600+Math.random()*2000,delay:Math.random()*1200,iterations:Infinity,direction:"alternate",easing:"ease-in-out"});
+    else c.setAttribute("opacity",.25);
+  }
+  // a gentle central three-way split motif drawn behind text
+  const cx=800, cy=760;
+  drawPath(svg,`M ${cx} 980 L ${cx} ${cy}`,COL.trunk,3,200,700);
+  const ends=[[380,COL.codex],[800,COL.gemini],[1220,COL.claude]];
+  ends.forEach((e,i)=>{
+    const [ex,color]=e;
+    drawPath(svg,`M ${cx} ${cy} C ${cx} ${cy-90}, ${ex} ${cy-40}, ${ex} ${cy-150}`,color,3,500+i*140,800);
+    setTimeout(()=>popNode(node(svg,ex,cy-150,color,7),0),1300+i*140);
+  });
+  popNode(node(svg,cx,cy,COL.trunk,10),1000);
+}
+
+/* ---------- SLIDE 2 : collision ---------- */
+function buildCollision(){
+  const svg=document.getElementById("g2"); clear(svg);
+  const y=470, x0=360, tip=1140;
+  // trunk
+  drawPath(svg,`M ${x0} ${y} L ${tip} ${y}`,COL.trunk,4,100,900);
+  // a couple settled commits
+  [0,1,2].forEach(i=> setTimeout(()=>popNode(node(svg,x0+120+i*180,y,COL.trunk,9),0),400+i*140));
+  label(svg,x0-20,y-40,"main",COL.trunk,600,"start");
+
+  // "directory" bracket at tip
+  const dir=el("rect",{x:tip-46,y:y-140,width:300,height:280,rx:16,fill:"none",stroke:"#33404f","stroke-width":2,"stroke-dasharray":"6 8"});
+  svg.appendChild(dir);
+  if(!reduce){ dir.style.opacity=0; dir.animate([{opacity:0},{opacity:1}],{duration:600,delay:900,fill:"both"}); }
+  const dl=label(svg,tip-46,y-155,"working directory",COL.muted||"#8792a3",1000,"start");
+  dl.setAttribute("font-size",18); dl.setAttribute("fill","#8792a3");
+
+  // three agents rushing the SAME tip coordinate
+  const tx=tip+60, ty=y;
+  const agents=[
+    {c:COL.codex, from:[tx-60,y-260]},
+    {c:COL.gemini,from:[tx+240,y]},
+    {c:COL.claude,from:[tx-60,y+260]}
+  ];
+  const winner=2; // claude wins
+  const nodes=[];
+  agents.forEach((a,i)=>{
+    // incoming edge from agent origin to tip
+    setTimeout(()=>{
+      const p=drawPath(svg,`M ${a.from[0]} ${a.from[1]} L ${tx} ${ty}`,a.c,3,0,500);
+      const n=node(svg,tx+(i-1)*4,ty+(i-1)*4,a.c,13); // near-identical coords → overlap
+      popNode(n,220);
+      nodes.push({n,c:a.c,i});
+    },1400+i*90);
+  });
+
+  // resolution: losers flicker + fade red with ×, winner stays
+  setTimeout(()=>{
+    if(reduce) return;
+    nodes.forEach(({n,c,i})=>{
+      if(i===winner){
+        n.c.animate([{transform:"scale(1)"},{transform:"scale(1.4)"},{transform:"scale(1)"}],
+          {duration:600,easing:"cubic-bezier(.34,1.56,.64,1)",fill:"both"});
+        n.c.setAttribute("fill","#0a0d12");
+      }else{
+        // flicker then fade to red X
+        n.c.animate([{opacity:1},{opacity:.2},{opacity:1},{opacity:.15},{opacity:.5}],{duration:600,fill:"both"});
+        setTimeout(()=>{
+          n.c.setAttribute("stroke",COL.red); n.c.style.color=COL.red;
+          n.c.animate([{opacity:.6},{opacity:.18}],{duration:700,fill:"both"});
+          // draw ×
+          const xx=n.x, yy=n.y, s=9;
+          [[-1,-1,1,1],[-1,1,1,-1]].forEach(seg=>{
+            const l=el("line",{x1:xx+seg[0]*s,y1:yy+seg[1]*s,x2:xx+seg[2]*s,y2:yy+seg[3]*s,
+              stroke:COL.red,"stroke-width":3,"stroke-linecap":"round",opacity:0});
+            svg.appendChild(l);
+            l.animate([{opacity:0},{opacity:.9}],{duration:400,fill:"both"});
+          });
+          // "lost" ghost drift
+          n.g.animate([{transform:"translate(0,0)"},{transform:`translate(${(i-1)*30}px,-24px)`}],{duration:900,easing:"ease-out",fill:"both"});
+        },650);
+      }
+    });
+  },2050);
+}
+
+/* ---------- SLIDE 3 : the split (hero) ---------- */
+function buildSplit(){
+  const svg=document.getElementById("g3"); clear(svg);
+  const cx=300, junc=560, cy=500;
+  // glowing .git core underneath
+  const core=el("ellipse",{cx:520,cy:cy,rx:150,ry:150,fill:"url(#coreGlow)",opacity:0});
+  const defs=el("defs",{});
+  defs.innerHTML=`<radialGradient id="coreGlow"><stop offset="0%" stop-color="#3a4be0" stop-opacity=".5"/><stop offset="70%" stop-color="#2a2f6a" stop-opacity=".12"/><stop offset="100%" stop-color="#000" stop-opacity="0"/></radialGradient>`;
+  svg.appendChild(defs); svg.appendChild(core);
+  if(!reduce) core.animate([{opacity:0},{opacity:1}],{duration:1000,delay:600,fill:"both"});
+  else core.setAttribute("opacity",1);
+
+  // trunk in
+  drawPath(svg,`M 120 ${cy} L ${junc} ${cy}`,COL.trunk,4.5,100,700);
+  const trunkNode=node(svg,junc,cy,COL.trunk,13);
+  setTimeout(()=>popNode(trunkNode,0),700);
+
+  // .git label
+  setTimeout(()=>{
+    const t=label(svg,520,cy+210,".git",  "#7f8bff",0,"middle");
+    t.setAttribute("font-size",26); t.setAttribute("font-weight",700);
+    const t2=label(svg,520,cy+238,"shared object DB + refs","#5a6cc0",120,"middle");
+    t2.setAttribute("font-size",15);
+  },900);
+
+  // three branches fan out
+  const lanes=[
+    {y:250, c:COL.codex,  name:"feat/api"},
+    {y:500, c:COL.gemini, name:"feat/ui"},
+    {y:750, c:COL.claude, name:"feat/auth"}
+  ];
+  const endX=1300;
+  lanes.forEach((ln,i)=>{
+    const d=`M ${junc} ${cy} C ${junc+180} ${cy}, ${junc+180} ${ln.y}, ${junc+360} ${ln.y} L ${endX} ${ln.y}`;
+    drawPath(svg,d,ln.c,4,900+i*160,1000);
+    // lane node + label after draw
+    setTimeout(()=>{
+      popNode(node(svg,endX,ln.y,ln.c,11),0);
+      const t=label(svg,endX+26,ln.y+7,ln.name,ln.c,120,"start");
+    },1900+i*160);
+  });
+}
+
+/* ---------- SLIDE 4 : wiring / commits streaming ---------- */
+function buildWiring(){
+  const svg=document.getElementById("g4"); clear(svg);
+  const junc=360, cy=460;
+  drawPath(svg,`M 120 ${cy} L ${junc} ${cy}`,COL.trunk,4.5,100,600);
+  setTimeout(()=>popNode(node(svg,junc,cy,COL.trunk,12),0),600);
+
+  const lanes=[
+    {y:250, c:COL.codex,  name:"feat/api"},
+    {y:460, c:COL.gemini, name:"feat/ui"},
+    {y:670, c:COL.claude, name:"feat/auth"}
+  ];
+  const startX=760, endX=1360;
+  lanes.forEach((ln,i)=>{
+    const d=`M ${junc} ${cy} C ${junc+150} ${cy}, ${junc+150} ${ln.y}, ${junc+300} ${ln.y} L ${startX} ${ln.y}`;
+    drawPath(svg,d,ln.c,4,500+i*140,900);
+    const t=label(svg,junc+300,ln.y-22,ln.name,ln.c,900+i*140,"start"); t.setAttribute("font-size",17);
+    // straight lane extension
+    drawPath(svg,`M ${startX} ${ln.y} L ${endX} ${ln.y}`,ln.c,4,1200+i*140,700);
+    // streaming commit dots pop in staggered
+    const n=5;
+    for(let k=0;k<n;k++){
+      const x=startX+ (k+.5)*((endX-startX)/n);
+      setTimeout(()=>popNode(node(svg,x,ln.y,ln.c,9),0), 1600 + i*120 + k*180);
+    }
+  });
+}
+
+/* ---------- SLIDE 5 : merge back ---------- */
+function buildMerge(){
+  const svg=document.getElementById("g5"); clear(svg);
+  const cy=470, startX=200, junc=760, mergeX=1120;
+  // incoming trunk
+  drawPath(svg,`M ${startX} ${cy} L ${junc-360} ${cy}`,COL.trunk,4.5,100,600);
+
+  const lanes=[
+    {y:250, c:COL.codex,  name:"feat/api"},
+    {y:470, c:COL.gemini, name:"feat/ui"},
+    {y:690, c:COL.claude, name:"feat/auth"}
+  ];
+  // draw the three lanes with a couple commits, then curve them into merge node
+  lanes.forEach((ln,i)=>{
+    // lane body
+    drawPath(svg,`M ${junc-360} ${ln.y} L ${junc-120} ${ln.y}`,ln.c,4,300+i*120,600);
+    // a commit on each
+    setTimeout(()=>popNode(node(svg,junc-240,ln.y,ln.c,9),0),700+i*120);
+    // converging curve into merge node
+    const d=`M ${junc-120} ${ln.y} C ${junc+40} ${ln.y}, ${junc+40} ${cy}, ${mergeX} ${cy}`;
+    drawPath(svg,d,ln.c,4,1200+i*160,900);
+  });
+
+  // merge node snap + green check
+  setTimeout(()=>{
+    const mn=node(svg,mergeX,cy,COL.codex,16);
+    popNode(mn,0);
+    // pulse ring
+    if(!reduce){
+      const ring=el("circle",{cx:mergeX,cy:cy,r:16,fill:"none",stroke:COL.codex,"stroke-width":3,opacity:.9});
+      svg.appendChild(ring);
+      ring.animate([{r:16,opacity:.9},{r:60,opacity:0}],{duration:900,easing:"ease-out",fill:"both"});
+    }
+    // outgoing trunk after merge
+    drawPath(svg,`M ${mergeX} ${cy} L 1440 ${cy}`,COL.codex,4.5,300,700);
+    // check mark
+    setTimeout(()=>{
+      const chk=el("path",{d:`M ${mergeX-7} ${cy} l 5 6 l 10 -13`,fill:"none",stroke:"#eafff5","stroke-width":3.5,"stroke-linecap":"round","stroke-linejoin":"round"});
+      svg.appendChild(chk);
+      if(!reduce){ const L=chk.getTotalLength(); chk.style.strokeDasharray=L; chk.style.strokeDashoffset=L;
+        chk.animate([{strokeDashoffset:L},{strokeDashoffset:0}],{duration:400,easing:"ease-out",fill:"both"}); }
+      const t=label(svg,mergeX,cy+64,"merged",COL.codex,120,"middle"); t.setAttribute("font-size",20); t.setAttribute("font-weight",700);
+    },400);
+  },2000);
+}
+
+const builders=[buildTitle,buildCollision,buildSplit,buildWiring,buildMerge];
+
+/* ---------- navigation ---------- */
+const slides=[...document.querySelectorAll(".slide")];
+const total=slides.length;
+let idx=0;
+
+// progress dots
+const dotsWrap=document.querySelector("#progress .dots");
+slides.forEach(()=>{ const i=document.createElement("i"); dotsWrap.appendChild(i); });
+const dots=[...dotsWrap.children];
+
+function show(n){
+  n=Math.max(0,Math.min(total-1,n));
+  idx=n;
+  slides.forEach((s,i)=>s.classList.toggle("active",i===n));
+  dots.forEach((d,i)=>d.classList.toggle("on",i===n));
+  document.getElementById("count").textContent=(n+1)+" / "+total;
+  // restart entrance: force reflow on active slide's animated children
+  const s=slides[n];
+  s.querySelectorAll(".rise,.fade").forEach(elm=>{ elm.style.animation="none"; void elm.offsetWidth; elm.style.animation=""; });
+  builders[n]();
+}
+function next(){ if(idx<total-1) show(idx+1); }
+function prev(){ if(idx>0) show(idx-1); }
+
+document.getElementById("stage").addEventListener("click",next);
+
+window.addEventListener("keydown",(e)=>{
+  if(e.key==="ArrowRight"||e.key===" "||e.key==="Spacebar"){ e.preventDefault(); next(); }
+  else if(e.key==="ArrowLeft"){ e.preventDefault(); prev(); }
+  else if(e.key==="1"||e.key==="2"||e.key==="3"){
+    try{ window.parent.postMessage({type:'switchVariant',key:({'1':'a','2':'b','3':'c'})[e.key]},'*'); }catch(err){}
+  }
+});
+
+show(0);
+</script>
+</body>
+</html>

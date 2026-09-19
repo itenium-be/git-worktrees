@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<!-- PROTOTYPE — throwaway aesthetic comparison for the Git Worktrees talk. Delete after picking a direction. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Git Worktrees — aesthetic bake-off</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #08080a; overflow: hidden;
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+  #stage { position: fixed; inset: 0 0 64px 0; }
+  #stage iframe { width: 100%; height: 100%; border: 0; display: block; background: #08080a; }
+
+  /* --- prototype chrome: deliberately NOT part of any design being judged --- */
+  #bar {
+    position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 6px; z-index: 10;
+    padding: 6px; border-radius: 999px;
+    background: rgba(20,20,24,.92); border: 1px solid rgba(255,255,255,.12);
+    box-shadow: 0 10px 40px rgba(0,0,0,.6); backdrop-filter: blur(8px);
+    font-size: 13px; user-select: none;
+  }
+  #bar button {
+    appearance: none; border: 0; cursor: pointer; color: #cfcfd6;
+    background: transparent; border-radius: 999px; padding: 8px 14px;
+    font: inherit; white-space: nowrap; transition: background .15s, color .15s;
+  }
+  #bar button:hover { background: rgba(255,255,255,.08); color: #fff; }
+  #bar button.active { background: #fff; color: #111; font-weight: 600; }
+  #bar .chev { padding: 8px 10px; font-size: 15px; color: #8a8a93; }
+  #bar .sep { width: 1px; align-self: stretch; margin: 4px 2px; background: rgba(255,255,255,.12); }
+  #bar .hint { padding: 0 10px 0 4px; color: #6a6a72; font-size: 11px; }
+</style>
+</head>
+<body>
+  <div id="stage"><iframe id="frame" title="variant"></iframe></div>
+  <div id="bar">
+    <button class="chev" data-nav="-1" aria-label="previous">‹</button>
+    <button data-variant="a">A · Multiplayer IDE</button>
+    <button data-variant="b">B · Living Git Graph</button>
+    <button data-variant="c">C · tmux Command Center</button>
+    <button class="chev" data-nav="1" aria-label="next">›</button>
+    <span class="sep"></span>
+    <span class="hint">← → slides · 1/2/3 switch</span>
+  </div>
+
+<script>
+  const VARIANTS = ['a', 'b', 'c'];
+  const FILES = { a: 'variant-a.html', b: 'variant-b.html', c: 'variant-c.html' };
+  const frame = document.getElementById('frame');
+  const bar = document.getElementById('bar');
+
+  const currentFromUrl = () => {
+    const v = new URLSearchParams(location.search).get('variant');
+    return VARIANTS.includes(v) ? v : 'a';
+  };
+  let current = currentFromUrl();
+
+  function render() {
+    // only reload the iframe if the file actually changed, so re-highlighting doesn't reset the deck
+    const want = FILES[current];
+    if (!frame.src.endsWith(want)) frame.src = want;
+    for (const btn of bar.querySelectorAll('[data-variant]'))
+      btn.classList.toggle('active', btn.dataset.variant === current);
+    const url = new URL(location);
+    url.searchParams.set('variant', current);
+    history.replaceState(null, '', url);
+  }
+  function setVariant(v) { if (VARIANTS.includes(v) && v !== current) { current = v; render(); } }
+  function cycle(dir) { setVariant(VARIANTS[(VARIANTS.indexOf(current) + dir + VARIANTS.length) % VARIANTS.length]); }
+
+  bar.addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.variant) setVariant(b.dataset.variant);
+    else if (b.dataset.nav) cycle(Number(b.dataset.nav));
+  });
+
+  // digit keys work at the top level too (when the iframe isn't focused)
+  addEventListener('keydown', (e) => {
+    if (e.key === '1') setVariant('a');
+    else if (e.key === '2') setVariant('b');
+    else if (e.key === '3') setVariant('c');
+  });
+  // ...and when a variant deck has focus, it forwards digit presses up to us
+  addEventListener('message', (e) => {
+    if (e.data && e.data.type === 'switchVariant') setVariant(e.data.key);
+  });
+
+  render();
+</script>
+</body>
+</html>
