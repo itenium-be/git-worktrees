@@ -3,6 +3,7 @@
   "scripts": {
     "dev": "slidev",
     "dev:graph": "slidev slides-graph.md",
+    "dev:frontmania": "slidev slides-frontmania.md",
     "dev:ide": "slidev slides-ide.md",
     "dev:tmux": "slidev slides-tmux.md",
     "build": "slidev build --base /git-worktrees/",
