@@ -2,6 +2,9 @@
   "private": true,
   "scripts": {
     "dev": "slidev",
+    "dev:graph": "slidev slides-graph.md",
+    "dev:ide": "slidev slides-ide.md",
+    "dev:tmux": "slidev slides-tmux.md",
     "build": "slidev build --base /git-worktrees/",
     "export": "slidev export --format pptx --output ../git-worktrees.pptx --with-clicks=false"
   },
