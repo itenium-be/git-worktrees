@@ -1,5 +1,5 @@
 <template>
-  <div class="strip">
+  <div ref="rigEl" class="strip">
     <div class="row">
       <div
         v-for="(t, i) in talks"
@@ -33,6 +33,8 @@
 </template>
 
 <script setup>
+import { nextTick, ref, watch } from 'vue'
+
 const props = defineProps({
   talks: { type: Array, required: true },
   stages: { type: Array, required: true },
@@ -44,6 +46,37 @@ const isShown = (t) => props.clicks >= (t.at ?? 0)
 const isDim = (t) => t.dimAt != null && props.clicks >= t.dimAt
 const isGone = (t) => t.hideAt != null && props.clicks >= t.hideAt
 const isExpanded = (t) => t.expandAt != null && props.clicks >= t.expandAt
+
+const rigEl = ref(null)
+const MORPH = 600
+
+// The header jumps from a centred column to a row at the top, and a layout jump cannot be
+// transitioned: measure where the sigil and title were, invert the move, then play it back.
+// Deltas are divided by the slide's scale, since rects are post-transform and translate is not.
+watch(
+  () => props.clicks,
+  async () => {
+    const els = [...(rigEl.value?.querySelectorAll('.sigil, .title') ?? [])]
+    const first = els.map((el) => el.getBoundingClientRect())
+    await nextTick()
+    els.forEach((el, i) => {
+      const last = el.getBoundingClientRect()
+      if (!last.width || !first[i].width) return
+      const scale = last.width / el.offsetWidth
+      const dx = (first[i].left - last.left) / scale
+      const dy = (first[i].top - last.top) / scale
+      const ds = first[i].height / last.height
+      if (Math.abs(dx) < 1 && Math.abs(dy) < 1 && Math.abs(ds - 1) < 0.01) return
+      el.style.transition = 'none'
+      el.style.transformOrigin = 'top left'
+      el.style.transform = `translate(${dx}px, ${dy}px) scale(${ds})`
+      requestAnimationFrame(() => {
+        el.style.transition = `transform ${MORPH}ms ease`
+        el.style.transform = ''
+      })
+    })
+  },
+)
 </script>
 
 <style scoped>
@@ -163,13 +196,8 @@ const isExpanded = (t) => t.expandAt != null && props.clicks >= t.expandAt
   font-size: 1.8rem;
 }
 
-/* Both axes: height because the <br> keeps two lines however narrow it gets, width
-   because a zero-height flex item still shoves the header off centre. */
 .frame.expanded .sub {
-  margin: 0;
-  max-height: 0;
-  max-width: 0;
-  opacity: 0;
+  display: none;
 }
 
 /* Collapsed to zero until the frame opens, so the poster keeps its centred layout. */
