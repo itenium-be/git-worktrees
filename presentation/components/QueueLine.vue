@@ -58,7 +58,8 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import { useNav } from '@slidev/client'
 
 const props = defineProps({
   branches: { type: Array, required: true },
@@ -225,7 +226,27 @@ async function cycle() {
   relayout()
 }
 
+// Slidev mounts the neighbouring slides ahead of time, so the queue would be halfway
+// drained by the time the deck reaches it. The slide context is not injected through this
+// theme's layouts, so the slide number comes off the rendered page element instead.
+const { currentSlideNo } = useNav()
+const myPage = ref(null)
+const isActive = computed(() => myPage.value != null && myPage.value === currentSlideNo.value)
+const onScreen = () =>
+  isActive.value
+    ? Promise.resolve()
+    : new Promise((resolve) => {
+        const stop = watch(isActive, (on) => {
+          if (!on) return
+          stop()
+          resolve()
+        })
+      })
+
 onMounted(async () => {
+  myPage.value = Number(rigEl.value?.closest('[class*="slidev-page-"]')?.className.match(/slidev-page-(\d+)/)?.[1]) || null
+  await onScreen()
+  if (!alive) return
   relayout()
 
   const blink = async () => {
