@@ -207,7 +207,6 @@ import { finalThoughts } from './components/termScenes.mjs'
 
 <FinalThoughts :columns="finalThoughts" :clicks="$clicks" />
 
-<!-- Same move, twice: stop gating every change, sample periodically instead. The lander is the bottleneck, so take the tests out of it and admit main will be red most of the day — the green comes from a stabilization pass, not from every merge. Optimistic merging, the C4 name for it. Then the same question about review: nobody is reading how the function got written, so spend the attention on what the agent cannot check for itself. -->
 
 ---
 layout: fm-end
