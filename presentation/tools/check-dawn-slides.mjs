@@ -3,7 +3,7 @@
 import { chromium } from 'playwright-chromium'
 
 const BASE = `http://127.0.0.1:${process.argv[2] ?? 3030}`
-const DAWN = [[5, 'life was good'], [7, 'life was still good']]
+const DAWN = [[5, 'life was good'], [7, 'life was still good'], [11, 'and life was good again']]
 const PLAIN = 4
 // Slidev's own headless noise, not the deck's.
 const IGNORE = [/Wake Lock permission/, /@server-reactive\/nav/]

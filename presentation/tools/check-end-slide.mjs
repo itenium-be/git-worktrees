@@ -4,7 +4,7 @@ import { chromium } from 'playwright-chromium'
 import { encode } from 'uqr'
 
 const BASE = `http://127.0.0.1:${process.argv[2] ?? 3030}`
-const SLIDE = 15
+const SLIDE = 16
 const SOURCE = 'itenium-be/git-worktrees'
 const URL_ = `https://github.com/${SOURCE}`
 const IGNORE = [/Wake Lock permission/, /@server-reactive\/nav/]

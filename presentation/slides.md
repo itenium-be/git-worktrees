@@ -152,6 +152,15 @@ import { risen } from './components/termScenes.mjs'
 
 ---
 layout: fm-content
+speakerTitle: "The Resurrection: git worktree"
+center: true
+dawn: true
+---
+
+# and life was good again
+
+---
+layout: fm-content
 speakerTitle: And Finally Claude Took Over Completely
 bleed: true
 spill: true

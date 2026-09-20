@@ -3,7 +3,7 @@
 import { chromium } from 'playwright-chromium'
 
 const BASE = `http://127.0.0.1:${process.argv[2] ?? 3030}`
-const SLIDE = 14
+const SLIDE = 15
 const CLICKS = 7
 const IGNORE = [/Wake Lock permission/, /@server-reactive\/nav/]
 
