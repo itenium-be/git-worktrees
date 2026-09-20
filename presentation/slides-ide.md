@@ -3,7 +3,7 @@ theme: ./theme
 title: "Git Worktrees"
 subTitle: One Repo, N Coding Agents
 transition: fade
-session-time: 10min
+session-time: 20min
 track: Git
 type: Theoretical
 first: 2026-10-06
@@ -12,7 +12,7 @@ aspectRatio: 16/10
 
 <IdeCover />
 
-<!-- Multiplayer-IDE aesthetic: presence cursors drift over a title "file". One repo, N coding agents — a 10-minute lightning talk. -->
+<!-- Multiplayer-IDE aesthetic: presence cursors drift over a title "file". One repo, N coding agents — a 20-minute talk. -->
 
 ---
 layout: agenda

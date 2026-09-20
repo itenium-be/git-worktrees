@@ -1,6 +1,6 @@
 # Aesthetic bake-off — PROTOTYPE (throwaway)
 
-**Question:** Which visual/animation direction for the "Git Worktrees: One Repo, N Coding Agents" lightning talk?
+**Question:** Which visual/animation direction for the "Git Worktrees: One Repo, N Coding Agents" talk?
 
 **How to view:** open `prototypes/index.html` in a browser. Bottom bar (or keys `1`/`2`/`3`) switches variant; `←`/`→` (or click) moves through slides.
 

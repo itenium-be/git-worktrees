@@ -3,7 +3,7 @@ theme: ./theme
 title: "Git Worktrees"
 subTitle: One Repo, N Coding Agents
 transition: fade
-session-time: 10min
+session-time: 20min
 track: Git
 type: Theoretical
 first: 2026-10-06

@@ -7,7 +7,7 @@
     >
       <div class="ide-cover-code">
         <div class="ide-cover-rise">
-          <div class="ide-comment">// a lightning talk</div>
+          <div class="ide-comment">// a 20-minute talk</div>
           <h1 class="ide-cover-title">Git Worktrees</h1>
           <div class="ide-cover-sub">One Repo, <b>N&nbsp;Coding&nbsp;Agents</b></div>
           <div class="ide-cover-prompt">
