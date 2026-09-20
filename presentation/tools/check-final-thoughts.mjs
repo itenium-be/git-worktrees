@@ -4,7 +4,7 @@ import { chromium } from 'playwright-chromium'
 
 const BASE = `http://127.0.0.1:${process.argv[2] ?? 3030}`
 const SLIDE = 15
-const CLICKS = 7
+const CLICKS = 8
 const IGNORE = [/Wake Lock permission/, /@server-reactive\/nav/]
 
 const browser = await chromium.launch()
@@ -34,6 +34,8 @@ const read = () => page.evaluate((n) => {
     colTops: cols.map(c => Math.round(c.getBoundingClientRect().top)),
     colHeights: cols.map(c => Math.round(c.getBoundingClientRect().height)),
     visible: lines.filter(shown).length,
+    colsShown: cols.map(shown),
+    rightLines: [...(cols[1]?.querySelectorAll('.line') ?? [])].filter(shown).length,
     total: lines.length,
     tags: [...root.querySelectorAll('.tags span')].length,
     tagsShown: shown(root.querySelector('.tags')),
@@ -52,6 +54,12 @@ for (let i = 0; i < CLICKS; i++) {
   await page.waitForTimeout(200)
 }
 const after = await read()
+await page.goto(`${BASE}/${SLIDE}?clicks=3`, { waitUntil: 'networkidle' })
+await page.waitForTimeout(600)
+const atThree = await read()
+await page.goto(`${BASE}/${SLIDE}?clicks=4`, { waitUntil: 'networkidle' })
+await page.waitForTimeout(600)
+const atFour = await read()
 const url = page.url()
 
 const bad = [...errs]
@@ -60,6 +68,8 @@ if (before.heads.join('|') !== 'Merge queue as next bottleneck?|But.. What about
 if (before.colWidths[1] <= before.colWidths[0]) bad.push('the review box is not the wider one: ' + before.colWidths.join(' vs '))
 if (Math.abs(before.colTops[0] - before.colTops[1]) > 1) bad.push('boxes not top-aligned: ' + before.colTops.join(' vs '))
 if (Math.abs(after.colHeights[0] - after.colHeights[1]) > 1) bad.push('boxes not equal height: ' + after.colHeights.join(' vs '))
+if (before.colsShown.join() !== 'true,false') bad.push('boxes shown before the first click: ' + before.colsShown.join())
+if (after.colsShown.join() !== 'true,true') bad.push('boxes shown after all clicks: ' + after.colsShown.join())
 if (before.visible !== 0) bad.push(`${before.visible} lines visible before the first click`)
 if (after.visible !== after.total) bad.push(`${after.visible}/${after.total} lines visible after ${CLICKS} clicks`)
 if (after.total !== 6) bad.push(`expected 6 lines, found ${after.total}`)
@@ -70,6 +80,10 @@ if (before.hasCard) bad.push('the big card is still drawn')
 if (after.overflow > 1) bad.push(`card scrolls: ${after.overflow}px of overflow`)
 if (after.spills) bad.push('content runs past the card')
 if (new URL(url).pathname !== `/${SLIDE}`) bad.push(`ran out of clicks on slide ${SLIDE}: now at ${url}`)
+
+if (atThree.colsShown.join() !== 'true,false') bad.push('the review box is up before the queue box is done: ' + atThree.colsShown.join())
+if (atFour.colsShown.join() !== 'true,true') bad.push('the review box is not up on its own click: ' + atFour.colsShown.join())
+if (atFour.rightLines !== 0) bad.push(`${atFour.rightLines} review lines land with the box instead of on the next click`)
 
 console.log(`slide ${SLIDE} (final thoughts)  ${bad.length ? 'FAIL: ' + bad.join(' | ') : 'ok'}`)
 await browser.close()

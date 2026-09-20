@@ -207,7 +207,7 @@ import { branchPool } from './components/termScenes.mjs'
 layout: fm-content
 speakerTitle: Final Thoughts
 naked: true
-clicks: 7
+clicks: 8
 ---
 
 <script setup>

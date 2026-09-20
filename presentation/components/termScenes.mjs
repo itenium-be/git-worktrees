@@ -618,12 +618,13 @@ export const finalThoughts = [
   {
     title: 'But.. What about code review?',
     wide: true,
+    showAt: 4,
     lines: [
-      { at: 4, kind: 'drop', text: 'how a function or class is implemented' },
-      { at: 5, kind: 'cost', text: 'nobody reads that diff anymore' },
-      { at: 6, kind: 'keep', text: 'human review for' },
+      { at: 5, kind: 'drop', text: 'who cares what the CSS looks like? or a component or class?' },
+      { at: 6, kind: 'cost', text: 'I don\'t read that diff anymore' },
+      { at: 7, kind: 'keep', text: 'human review remains important for' },
     ],
-    tagsAt: 7,
+    tagsAt: 8,
     tags: ['security', 'architecture', 'performance', 'test quality', 'API surface'],
   },
 ]

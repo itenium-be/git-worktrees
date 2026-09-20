@@ -1,6 +1,11 @@
 <template>
   <div class="ft" :style="{ gridTemplateColumns: track }">
-    <section v-for="col in columns" :key="col.title" class="col" :class="{ wide: col.wide }">
+    <section
+      v-for="col in columns"
+      :key="col.title"
+      class="col"
+      :class="{ wide: col.wide, on: clicks >= (col.showAt ?? 0) }"
+    >
       <h2>{{ col.title }}</h2>
       <p v-for="line in col.lines" :key="line.text" class="line" :class="[line.kind, { on: clicks >= line.at }]">
         {{ line.text }}
@@ -35,13 +40,22 @@ const track = computed(() => props.columns.map((c) => (c.wide ? '1.45fr' : '1fr'
   box-sizing: border-box;
 }
 
+/* Hidden rather than absent: the grid keeps both boxes aligned and equally tall. */
 .col {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 320ms ease;
   padding: 1.6rem 2rem;
   box-sizing: border-box;
   border: 2px solid var(--cyan);
   border-radius: 1.25rem;
   background: rgba(29, 29, 27, 0.88);
   color: #fff;
+}
+
+.col.on {
+  opacity: 1;
+  visibility: visible;
 }
 
 .col h2 {
