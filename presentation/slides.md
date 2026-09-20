@@ -4,7 +4,7 @@ title: "Git Worktrees"
 subTitle: One Repo, N Coding Agents
 transition: fade
 session-time: 20min
-track: Git
+track: AI
 type: Theoretical
 first: 2026-10-06
 aspectRatio: 16/9
