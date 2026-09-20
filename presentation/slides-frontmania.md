@@ -3,7 +3,7 @@ theme: ./theme
 title: "Git Worktrees"
 subTitle: One Repo, N Coding Agents
 transition: fade
-session-time: 10min
+session-time: 20min
 track: Git
 type: Theoretical
 first: 2026-10-06
@@ -22,6 +22,21 @@ center: true
 ---
 
 # One Repo, N Coding Agents
+
+<v-click>
+
+<p class="aside">(yet another AI talk)</p>
+
+</v-click>
+
+<style>
+.aside {
+  margin-top: 1.5rem;
+  font-size: 1.4rem;
+  font-style: italic;
+  opacity: 0.55;
+}
+</style>
 
 ---
 layout: fm-content
@@ -42,13 +57,14 @@ import { beforeAI } from './components/termScenes.mjs'
 layout: fm-content
 speakerTitle: Before the AI craze
 center: true
+dawn: true
 ---
 
-# and life was good
+# life was good
 
 ---
 layout: fm-content
-speakerTitle: Pro Claude Code Subscription
+speakerTitle: Claude Entered The Scene
 bleed: true
 clicks: 3
 ---
@@ -63,11 +79,12 @@ import { handover } from './components/termScenes.mjs'
 
 ---
 layout: fm-content
-speakerTitle: Pro Claude Code Subscription
+speakerTitle: Claude Entered The Scene
 center: true
+dawn: true
 ---
 
-# and life was still good
+# life was still good
 
 <v-click>
 
@@ -77,7 +94,7 @@ center: true
 
 ---
 layout: fm-content
-speakerTitle: and then Claude basically took over all coding
+speakerTitle: Claude Took Center Stage
 bleed: true
 clicks: 3
 ---
@@ -92,7 +109,7 @@ import { takeover } from './components/termScenes.mjs'
 
 ---
 layout: fm-content
-speakerTitle: this is when troubles started
+speakerTitle: Here Lieth My Working Tree
 flicker: true
 naked: true
 clicks: 4
@@ -104,13 +121,29 @@ import { graves } from './components/termScenes.mjs'
 
 <Graveyard :stones="graves" :clicks="$clicks" />
 
-<!-- One stone rises out of the fog per click. The title carries a candle flicker. -->
+<!-- One stone rises per click, crooked, out of the storm. Lightning strikes on its own every few seconds — do not wait for it. -->
 
 ---
 layout: fm-content
-speakerTitle: and then things started to get out of control
+speakerTitle: "The Resurrection: git worktree"
+naked: true
+clicks: 4
+---
+
+<script setup>
+import { risen } from './components/termScenes.mjs'
+</script>
+
+<Graveyard :stones="risen" :weather="$clicks" :clicks="$clicks" />
+
+<!-- One stone per click, and the weather lets up with it: lightning, then rain, then the sky itself. Each stone stands up straight, grows a spire, and its engraving dissolves into the cure. Landed July 29, 2015, in git 2.5 — a plumbing command nobody needed became the answer to the question nobody had yet. -->
+
+---
+layout: fm-content
+speakerTitle: And Finally Claude Took Over Completely
 bleed: true
-clicks: 2
+spill: true
+clicks: 3
 ---
 
 <script setup>
@@ -123,36 +156,19 @@ import { agentSessions } from './components/termScenes.mjs'
 
 ---
 layout: fm-content
-speakerTitle: git worktrees
+speakerTitle: A New Problem Surfaces
+flicker: true
+naked: true
+clicks: 6
 ---
 
-<v-clicks>
+<script setup>
+import { mergeRace } from './components/termScenes.mjs'
+</script>
 
-- In git for **over a decade** — and only now a killer feature
-- Your harness already knows them: `isolation: worktree` on a subagent
-- Already baked into agent frameworks like **Superpowers**
+<MergeRace :lines="mergeRace" :clicks="$clicks" />
 
-</v-clicks>
-
-<!-- Landed July 29, 2015, in git 2.5. A plumbing command nobody needed became the answer to the question nobody had yet. -->
-
----
-layout: fm-content
-speakerTitle: worktree challenges
----
-
-<v-clicks depth="2">
-
-- `node_modules` is gitignored — every tree installs from scratch
-  - pnpm or bun: one content-addressed store, hardlinked per tree
-- Every tree wants `:5173`
-  - derive the port from the tree name
-- `.env` never comes along — git never tracked it
-  - `.worktreeinclude`, applied on create
-
-</v-clicks>
-
-<!-- Worktrees isolate what git tracks. Everything your app needs to actually run is the stuff git ignores. -->
+<!-- One agent, one branch, and a main that will not hold still. Every lap is green; none of them lands. -->
 
 ---
 layout: fm-end
