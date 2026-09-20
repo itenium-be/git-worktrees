@@ -1,4 +1,5 @@
 .playwright-mcp/
+.claude/settings.local.json
 
 # Slidev
 presentation/node_modules/
