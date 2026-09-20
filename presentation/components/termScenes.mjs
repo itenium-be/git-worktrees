@@ -595,3 +595,29 @@ export const seriesStages = [
     lines: ['lights out, nobody watching'],
   },
 ]
+
+// The queue never drains: as one lands, the next name comes round again.
+export const branchPool = [
+  'fix/i18n',
+  'feat/auth',
+  'chore/deps',
+  'feat/discount',
+  'fix/cart',
+  'feat/checkout',
+  'chore/lockfile',
+  'fix/totals',
+  'feat/wishlist',
+  'fix/tax-rounding',
+  'chore/bump-vite',
+  'feat/guest-checkout',
+  'fix/stale-cart',
+  'feat/address-book',
+  'chore/drop-moment',
+  'fix/currency-fmt',
+  'feat/gift-cards',
+  'fix/retry-webhook',
+  'chore/ci-cache',
+  'feat/saved-cards',
+  'fix/empty-state',
+  'chore/tsconfig',
+]

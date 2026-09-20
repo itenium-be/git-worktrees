@@ -186,6 +186,21 @@ import { mergeRace } from './components/termScenes.mjs'
 <!-- One agent, one branch, and a main that will not hold still. Every lap is green; none of them lands. It gives up on click 6 and asks to be told when it is safe; click 7 is me saying so by hand. That hand-signal is the merge queue, and it is the next slide. -->
 
 ---
+layout: fm-content
+speakerTitle: Serialize The Landing
+dawn: true
+bleed: true
+---
+
+<script setup>
+import { branchPool } from './components/termScenes.mjs'
+</script>
+
+<QueueLine :branches="branchPool" />
+
+<!-- Runs on its own — talk over it. One lane, one branch at a time, and main only ever grows. Bors did this in 2014; GitHub, Mergify and Graphite sell it; a session told it is the only one allowed to touch main is the same thing. -->
+
+---
 layout: fm-end
 ---
 
