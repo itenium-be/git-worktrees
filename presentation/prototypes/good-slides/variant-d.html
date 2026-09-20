@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<!-- PROTOTYPE — "Spotlight": the world drops away, the words get the light. Delete after the decision. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>and life was good — Spotlight</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+  .fm-backdrop {
+    filter: blur(28px) brightness(.26) saturate(.4) sepia(.35);
+    transform: scale(1.08); /* the blur would otherwise bleed transparent edges into frame */
+  }
+  .glow {
+    position: absolute; inset: 0; z-index: 1;
+    background: radial-gradient(48% 52% at 50% 52%, rgba(255, 198, 108, .5), rgba(255, 160, 70, .14) 45%, transparent 72%);
+    animation: swell 9s ease-in-out infinite;
+  }
+  @keyframes swell { 50% { opacity: .72; } }
+
+  .spark {
+    position: absolute; z-index: 2;
+    width: .36%; aspect-ratio: 1; border-radius: 50%;
+    background: #FFE7B0; box-shadow: 0 0 .9em .2em rgba(255, 205, 120, .7);
+    animation: rise linear infinite;
+  }
+  @keyframes rise {
+    0%   { transform: translateY(130px) translateX(0); opacity: 0; }
+    12%  { opacity: .9; }
+    88%  { opacity: .7; }
+    100% { transform: translateY(-900px) translateX(var(--dx)); opacity: 0; }
+  }
+
+  .fm-speaker { color: #F4D7A6; text-shadow: 0 .06em .3em rgba(0,0,0,.9); }
+  .fm-dot { color: #E8A33D; }
+
+  .fm-card { background: transparent; border: none; padding: 0 8%; }
+  .fm-card h1 {
+    font-size: 3.6em; font-weight: 300; letter-spacing: .02em;
+    color: #FFEFD2;
+    text-shadow: 0 0 .7em rgba(255, 190, 100, .55), 0 0 2em rgba(255, 160, 60, .35);
+  }
+  .fm-card h2 {
+    font-weight: 400; color: #FFC978;
+    text-shadow: 0 0 .6em rgba(255, 170, 70, .5);
+  }
+</style>
+</head>
+<body>
+<div id="fit"><div class="deck">
+
+  <section class="slide active">
+    <img class="fm-backdrop" src="../../images/frontmania/backdrop.jpg" alt="">
+    <div class="glow"></div>
+    <div class="fm-speaker">Before the AI craze</div>
+    <img class="fm-badge" src="../../images/frontmania/logo.png" alt="FrontMania">
+    <div class="fm-card"><h1>and life was good</h1></div>
+  </section>
+
+  <section class="slide">
+    <img class="fm-backdrop" src="../../images/frontmania/backdrop.jpg" alt="">
+    <div class="glow"></div>
+    <div class="fm-speaker">Pro Claude Code Subscription</div>
+    <img class="fm-badge" src="../../images/frontmania/logo.png" alt="FrontMania">
+    <div class="fm-card">
+      <h1>and life was still good</h1>
+      <h2>maybe, even better?</h2>
+    </div>
+  </section>
+
+</div></div>
+<script>
+  const rnd = (lo, hi) => lo + Math.random() * (hi - lo);
+  for (const slide of document.querySelectorAll('.slide')) {
+    for (let n = 0; n < 34; n++) {
+      const s = document.createElement('span');
+      s.className = 'spark';
+      s.style.left = rnd(6, 94) + '%';
+      s.style.top = rnd(55, 100) + '%';
+      s.style.setProperty('--dx', rnd(-60, 60) + 'px');
+      s.style.animationDuration = rnd(9, 20).toFixed(1) + 's';
+      s.style.animationDelay = '-' + rnd(0, 18).toFixed(1) + 's';
+      slide.append(s);
+    }
+  }
+</script>
+<script src="shared.js"></script>
+</body>
+</html>

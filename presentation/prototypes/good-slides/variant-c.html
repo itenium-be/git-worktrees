@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<!-- PROTOTYPE — "Sunny flat": the photo is gone, the card is gone. Delete after the decision. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>and life was good — Sunny flat</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+  .sky {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, #4FB8E8 0%, #8FD6F2 38%, #C9EDF9 62%, #FFF0BE 88%);
+  }
+  .sun {
+    position: absolute; left: 78%; top: 15%; z-index: 1;
+    width: 9%; aspect-ratio: 1; transform: translate(-50%, -50%);
+    border-radius: 50%; background: #FFD84D;
+    box-shadow: 0 0 0 1.2em rgba(255, 224, 110, .38), 0 0 0 2.6em rgba(255, 229, 140, .2);
+    animation: pulse 6s ease-in-out infinite;
+  }
+  @keyframes pulse { 50% { box-shadow: 0 0 0 1.8em rgba(255,224,110,.42), 0 0 0 3.4em rgba(255,229,140,.22); } }
+  .sunrays {
+    position: absolute; left: 78%; top: 15%; z-index: 0;
+    width: 46%; aspect-ratio: 1; transform: translate(-50%, -50%);
+    background: conic-gradient(from 0deg, rgba(255, 233, 150, .55) 0 4deg, transparent 4deg 30deg);
+    -webkit-mask-image: radial-gradient(circle, #000 14%, transparent 52%);
+    mask-image: radial-gradient(circle, #000 14%, transparent 52%);
+    animation: spin 120s linear infinite;
+  }
+  @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+  .cloud {
+    position: absolute; z-index: 1; height: 4.5%; aspect-ratio: 3.4;
+    background: #fff; border-radius: 999px; opacity: .92;
+    filter: drop-shadow(0 .4em .6em rgba(70, 140, 180, .12));
+    animation: sail linear infinite;
+  }
+  .cloud::before, .cloud::after {
+    content: ''; position: absolute; background: #fff; border-radius: 50%;
+  }
+  .cloud::before { width: 46%; aspect-ratio: 1; left: 12%; bottom: 38%; }
+  .cloud::after  { width: 34%; aspect-ratio: 1; left: 50%; bottom: 44%; }
+  @keyframes sail { from { transform: translateX(-560px); } to { transform: translateX(2420px); } }
+
+  .scene { position: absolute; inset: 0; z-index: 2; }
+
+  .fm-speaker { color: #14493F; text-shadow: 0 .04em .12em rgba(255, 255, 255, .55); }
+  .fm-dot { color: #E8763A; }
+
+  .fm-card { background: transparent; border: none; padding: 0 6%; }
+  .fm-card h1 {
+    font-size: 3.4em; color: #123B33;
+    text-shadow: 0 0 .5em rgba(255,255,255,.9), 0 .05em .04em rgba(255,255,255,.95);
+  }
+  .fm-card h2 { color: #17724F; text-shadow: 0 0 .45em rgba(255,255,255,.9); }
+</style>
+</head>
+<body>
+<div id="fit"><div class="deck">
+
+  <template id="scenery">
+    <div class="sky"></div>
+    <div class="sunrays"></div>
+    <div class="sun"></div>
+    <div class="cloud" style="top:8%;  animation-duration:78s; animation-delay:-10s"></div>
+    <div class="cloud" style="top:19%; animation-duration:112s; animation-delay:-60s; height:3.2%; opacity:.8"></div>
+    <div class="cloud" style="top:29%; animation-duration:95s; animation-delay:-35s; height:5.4%"></div>
+    <svg class="scene" viewBox="0 0 1920 1080" preserveAspectRatio="none" aria-hidden="true">
+      <!-- Friendly restatement of the conference castle: same silhouette, flags up, no bats. -->
+      <g transform="translate(1120 560) scale(1.25)" fill="#2E7D64">
+        <rect x="0" y="60" width="240" height="120"/>
+        <rect x="14" y="10" width="52" height="170"/><polygon points="6,14 40,-46 74,14"/>
+        <rect x="94" y="-14" width="60" height="194"/><polygon points="86,-10 124,-78 162,-10"/>
+        <rect x="180" y="24" width="50" height="156"/><polygon points="172,28 205,-30 238,28"/>
+        <g fill="#E8763A">
+          <rect x="38" y="-62" width="3" height="20"/><polygon points="41,-60 68,-53 41,-46"/>
+          <rect x="122" y="-96" width="3" height="22"/><polygon points="125,-94 154,-86 125,-78"/>
+          <rect x="203" y="-46" width="3" height="20"/><polygon points="206,-44 232,-37 206,-30"/>
+        </g>
+      </g>
+      <path d="M0 700 Q 380 600 760 690 T 1520 660 T 1920 700 V1080 H0Z" fill="#5FBE8E"/>
+      <path d="M0 800 Q 460 700 940 800 T 1920 790 V1080 H0Z" fill="#3FA377"/>
+      <path d="M0 920 Q 520 840 1040 930 T 1920 900 V1080 H0Z" fill="#2E8560"/>
+      <g fill="#246E4E">
+        <g transform="translate(280 860)"><rect x="-8" y="0" width="16" height="60"/><circle cx="0" cy="-22" r="52"/></g>
+        <g transform="translate(1660 890)"><rect x="-7" y="0" width="14" height="52"/><circle cx="0" cy="-18" r="44"/></g>
+        <g transform="translate(620 940)"><rect x="-6" y="0" width="12" height="42"/><circle cx="0" cy="-14" r="34"/></g>
+      </g>
+    </svg>
+  </template>
+
+  <section class="slide active">
+    <div class="fm-speaker">Before the AI craze</div>
+    <img class="fm-badge" src="../../images/frontmania/logo.png" alt="FrontMania">
+    <div class="fm-card"><h1>and life was good</h1></div>
+  </section>
+
+  <section class="slide">
+    <div class="fm-speaker">Pro Claude Code Subscription</div>
+    <img class="fm-badge" src="../../images/frontmania/logo.png" alt="FrontMania">
+    <div class="fm-card">
+      <h1>and life was still good</h1>
+      <h2>maybe, even better?</h2>
+    </div>
+  </section>
+
+</div></div>
+<script>
+  const scenery = document.getElementById('scenery');
+  for (const slide of document.querySelectorAll('.slide')) slide.prepend(scenery.content.cloneNode(true));
+</script>
+<script src="shared.js"></script>
+</body>
+</html>

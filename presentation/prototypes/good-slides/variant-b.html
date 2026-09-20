@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<!-- PROTOTYPE — "Cozy night": still night, but warm instead of haunted. Delete after the decision. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>and life was good — Cozy night</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+  .fm-backdrop { filter: sepia(.45) saturate(1.25) hue-rotate(-12deg) brightness(.82) contrast(1.05); }
+
+  /* The lantern sits at roughly 35% / 74% of the source image; the bloom grows out of it. */
+  .lantern-bloom {
+    position: absolute; inset: 0; z-index: 1;
+    background:
+      radial-gradient(38% 46% at 35% 74%, rgba(255, 186, 92, .72), rgba(255, 150, 60, .22) 40%, transparent 70%),
+      radial-gradient(80% 60% at 50% 100%, rgba(224, 122, 40, .35), transparent 65%);
+    mix-blend-mode: screen;
+    animation: candlelight 5.7s ease-in-out infinite;
+  }
+  /* Uneven stops on purpose: an even pulse reads as a loading spinner, not a flame. */
+  @keyframes candlelight {
+    0%, 14%, 52%, 100% { opacity: 1; }
+    17% { opacity: .86; }
+    38% { opacity: .94; }
+    71% { opacity: .82; }
+  }
+  .warm-vignette {
+    position: absolute; inset: 0; z-index: 2;
+    background: radial-gradient(75% 70% at 45% 66%, transparent 35%, rgba(38, 18, 6, .62) 100%);
+  }
+
+  .fly {
+    position: absolute; z-index: 3;
+    width: .5%; aspect-ratio: 1; border-radius: 50%;
+    background: #FFDE8A;
+    box-shadow: 0 0 1.2em .35em rgba(255, 196, 92, .8);
+    animation: bob ease-in-out infinite alternate, blink ease-in-out infinite;
+  }
+  @keyframes bob { to { transform: translate(var(--dx), var(--dy)); } }
+  @keyframes blink { 0%, 100% { opacity: .15; } 45% { opacity: 1; } }
+
+  .fm-speaker { text-shadow: 0 .06em .25em rgba(0,0,0,.8); }
+  .fm-dot { color: #F0B455; }
+
+  .fm-card {
+    background: rgba(40, 25, 14, .82);
+    border-color: #E8A33D;
+    color: #FFF3DF;
+    box-shadow: 0 0 6em rgba(255, 176, 80, .22), 0 1.5em 4em rgba(0, 0, 0, .55);
+  }
+  .fm-card h1 { color: #FFD79A; text-shadow: 0 0 .5em rgba(255, 176, 80, .35); }
+  .fm-card h2 { color: #8FD6A0; }
+</style>
+</head>
+<body>
+<div id="fit"><div class="deck">
+
+  <section class="slide active">
+    <img class="fm-backdrop" src="../../images/frontmania/backdrop.jpg" alt="">
+    <div class="lantern-bloom"></div>
+    <div class="warm-vignette"></div>
+    <div class="fm-speaker">Before the AI craze</div>
+    <img class="fm-badge" src="../../images/frontmania/logo.png" alt="FrontMania">
+    <div class="fm-card"><h1>and life was good</h1></div>
+  </section>
+
+  <section class="slide">
+    <img class="fm-backdrop" src="../../images/frontmania/backdrop.jpg" alt="">
+    <div class="lantern-bloom"></div>
+    <div class="warm-vignette"></div>
+    <div class="fm-speaker">Pro Claude Code Subscription</div>
+    <img class="fm-badge" src="../../images/frontmania/logo.png" alt="FrontMania">
+    <div class="fm-card">
+      <h1>and life was still good</h1>
+      <h2>maybe, even better?</h2>
+    </div>
+  </section>
+
+</div></div>
+<script>
+  // Fireflies are scattered per-slide so both slides get their own drift, not a shared one.
+  const rnd = (lo, hi) => lo + Math.random() * (hi - lo);
+  for (const slide of document.querySelectorAll('.slide')) {
+    for (let n = 0; n < 26; n++) {
+      const f = document.createElement('span');
+      f.className = 'fly';
+      f.style.left = rnd(4, 96) + '%';
+      f.style.top = rnd(35, 95) + '%';
+      f.style.setProperty('--dx', rnd(-70, 70) + 'px');
+      f.style.setProperty('--dy', rnd(-90, 20) + 'px');
+      f.style.animationDuration = rnd(4, 9).toFixed(1) + 's, ' + rnd(2.2, 6).toFixed(1) + 's';
+      f.style.animationDelay = '-' + rnd(0, 8).toFixed(1) + 's, -' + rnd(0, 6).toFixed(1) + 's';
+      slide.append(f);
+    }
+  }
+</script>
+<script src="shared.js"></script>
+</body>
+</html>

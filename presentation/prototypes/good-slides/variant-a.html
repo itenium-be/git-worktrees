@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<!-- PROTOTYPE — "Dawn": same castle, the sun came up. Delete after the decision. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>and life was good — Dawn</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+  .fm-backdrop {
+    /* The source is a blue/purple night; the rotation lands it in sunrise amber. */
+    filter: hue-rotate(186deg) saturate(1.15) brightness(1.5) contrast(.88);
+  }
+  .dawn-wash {
+    position: absolute; inset: 0; z-index: 1; mix-blend-mode: soft-light;
+    background: linear-gradient(180deg, #7FD2FF 0%, #FFD98A 42%, #FF9E5E 68%, #6B4A2E 100%);
+  }
+  .dawn-lift {
+    position: absolute; inset: 0; z-index: 2;
+    background:
+      radial-gradient(70% 55% at 68% 23%, rgba(255,226,150,.85), rgba(255,190,110,.28) 45%, transparent 72%),
+      linear-gradient(180deg, rgba(180,230,255,.45), transparent 45%);
+  }
+  .sun {
+    position: absolute; left: 68%; top: 23%; z-index: 3;
+    width: 15%; aspect-ratio: 1; transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: radial-gradient(circle, #FFFDF2 38%, #FFE49B 58%, rgba(255,196,102,0) 72%);
+    box-shadow: 0 0 12em 6em rgba(255, 214, 140, .55);
+    animation: breathe 7s ease-in-out infinite;
+  }
+  @keyframes breathe { 50% { box-shadow: 0 0 15em 8em rgba(255, 214, 140, .72); } }
+
+  .rays {
+    position: absolute; left: 68%; top: 23%; z-index: 3;
+    width: 170%; aspect-ratio: 1; transform: translate(-50%, -50%);
+    background: conic-gradient(from 0deg, rgba(255,240,200,.30) 0 3deg, transparent 3deg 22deg);
+    -webkit-mask-image: radial-gradient(circle, #000 8%, rgba(0,0,0,.35) 30%, transparent 55%);
+    mask-image: radial-gradient(circle, #000 8%, rgba(0,0,0,.35) 30%, transparent 55%);
+    animation: spin 90s linear infinite;
+  }
+  @keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+  /* Birds where the source image has bats. */
+  .bird { position: absolute; z-index: 3; width: 1.4%; opacity: .5; animation: drift linear infinite; }
+  .bird path { fill: none; stroke: #4A3527; stroke-width: 8; stroke-linecap: round; }
+  .bird i { display: block; animation: flap 1.1s ease-in-out infinite; transform-origin: 50% 60%; }
+  @keyframes drift { from { transform: translateX(-260px); } to { transform: translateX(2180px); } }
+  @keyframes flap { 50% { transform: scaleY(.45); } }
+
+  .fm-speaker { color: #2A1D12; text-shadow: 0 0 .7em rgba(255, 246, 220, .95), 0 .05em .1em rgba(255,255,255,.7); }
+  .fm-dot { color: #C9722A; }
+
+  .fm-card {
+    background: rgba(255, 249, 238, .93);
+    border-color: #E8A33D;
+    color: var(--fm-ink);
+    box-shadow: 0 1.5em 4em rgba(90, 50, 20, .35);
+  }
+  .fm-card h1 { color: #2A1D12; }
+  .fm-card h2 { color: #1F8A5B; }
+</style>
+</head>
+<body>
+<div id="fit"><div class="deck">
+
+  <section class="slide active">
+    <img class="fm-backdrop" src="../../images/frontmania/backdrop-dawn.jpg" alt="">
+    <div class="dawn-wash"></div>
+    <div class="dawn-lift"></div>
+    <div class="rays"></div>
+    <div class="sun"></div>
+    <div class="bird" style="top:14%; animation-duration:41s; animation-delay:-6s"><i><svg viewBox="0 0 100 40"><path d="M5 28 Q25 6 48 26 Q70 6 95 28"/></svg></i></div>
+    <div class="bird" style="top:21%; animation-duration:53s; animation-delay:-25s; width:1%"><i><svg viewBox="0 0 100 40"><path d="M5 28 Q25 6 48 26 Q70 6 95 28"/></svg></i></div>
+    <div class="bird" style="top:9%;  animation-duration:64s; animation-delay:-40s; width:.8%"><i><svg viewBox="0 0 100 40"><path d="M5 28 Q25 6 48 26 Q70 6 95 28"/></svg></i></div>
+    <div class="fm-speaker">Before the AI craze</div>
+    <img class="fm-badge" src="../../images/frontmania/logo.png" alt="FrontMania">
+    <div class="fm-card"><h1>and life was good</h1></div>
+  </section>
+
+  <section class="slide">
+    <img class="fm-backdrop" src="../../images/frontmania/backdrop-dawn.jpg" alt="">
+    <div class="dawn-wash"></div>
+    <div class="dawn-lift"></div>
+    <div class="rays"></div>
+    <div class="sun"></div>
+    <div class="bird" style="top:16%; animation-duration:44s; animation-delay:-11s"><i><svg viewBox="0 0 100 40"><path d="M5 28 Q25 6 48 26 Q70 6 95 28"/></svg></i></div>
+    <div class="bird" style="top:11%; animation-duration:58s; animation-delay:-33s; width:1%"><i><svg viewBox="0 0 100 40"><path d="M5 28 Q25 6 48 26 Q70 6 95 28"/></svg></i></div>
+    <div class="fm-speaker">Pro Claude Code Subscription</div>
+    <img class="fm-badge" src="../../images/frontmania/logo.png" alt="FrontMania">
+    <div class="fm-card">
+      <h1>and life was still good</h1>
+      <h2>maybe, even better?</h2>
+    </div>
+  </section>
+
+</div></div>
+<script src="shared.js"></script>
+</body>
+</html>

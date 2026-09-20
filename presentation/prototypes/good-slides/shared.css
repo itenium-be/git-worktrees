@@ -1,0 +1,79 @@
+/* PROTOTYPE — geometry mirrors layouts/fm-content.vue at a fixed 1920x1080 stage. */
+:root {
+  --u: 31.35px; /* 1rem in the real deck, scaled to a 1920px-wide slide */
+  --fm-cyan: #5FC3DB;
+  --fm-ink: #1D1D1B;
+  --ease: cubic-bezier(.22, 1, .36, 1);
+  --sans: 'Segoe UI', system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+  --mono: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', Consolas, Menlo, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: #000; font-family: var(--sans); }
+
+#fit { position: fixed; inset: 0; display: grid; place-items: center; cursor: pointer; }
+.deck {
+  position: relative;
+  width: 1920px;
+  height: 1080px;
+  flex: none;
+  overflow: hidden;
+  font-size: var(--u);
+  transform-origin: center;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .45s var(--ease);
+}
+.slide.active { opacity: 1; visibility: visible; }
+
+.fm-backdrop { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+.fm-speaker {
+  position: absolute;
+  left: 2.6%;
+  top: 3.8%;
+  z-index: 5;
+  max-width: 78.9%;
+  font-weight: 700;
+  font-size: 1.5em;
+  color: #fff;
+}
+.fm-dot { color: var(--fm-cyan); }
+
+.fm-badge {
+  position: absolute;
+  left: 85.2%;
+  top: 6.4%;
+  width: 10.5%;
+  height: 17.4%;
+  z-index: 5;
+  object-fit: contain;
+}
+
+.fm-card {
+  position: absolute;
+  left: 2.6%;
+  top: 16.2%;
+  width: 94.8%;
+  height: 78.7%;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2.3% 3.2%;
+  border-radius: 1.25em;
+  background: rgba(29, 29, 27, .88);
+  border: 2px solid var(--fm-cyan);
+  color: #fff;
+}
+.fm-card h1 { margin: 0; font-size: 3em; font-weight: 700; color: #fff; }
+.fm-card h2 { margin: calc(1.5 * var(--u)) 0 0; font-size: 2em; font-weight: 600; color: var(--fm-cyan); }
+.fm-card.naked { background: transparent; border: none; border-radius: 0; padding: 0; }
