@@ -541,3 +541,51 @@ export const risen = graves.map((g, i) => ({
   cureSigil: '🕯️',
   ...CURES[i],
 }))
+
+export const series = [
+  {
+    sigil: '🏠',
+    title: 'Homelab',
+    subTitle: "I don't know networks, but Claude does!",
+    at: 1,
+    dimAt: 3,
+    hideAt: 4,
+  },
+  {
+    sigil: '🐧',
+    title: 'Linux Migration',
+    subTitle: 'How Claude made me abandon Windows',
+    at: 2,
+    dimAt: 3,
+    hideAt: 4,
+  },
+  {
+    sigil: '🏭',
+    title: 'Dark Factory',
+    subTitle: 'I wanted a merge queue,<br> I ended up with a dark factory',
+    at: 3,
+    expandAt: 4,
+  },
+]
+
+// The three stages inside the expanded Dark Factory: what you must already have,
+// what this talk is about, and where it lands.
+export const seriesStages = [
+  {
+    at: 5,
+    title: 'Guardrails & Backpressure',
+    lines: ['lint & tsc dialed to 11'],
+    groups: [{ label: 'Testing', lines: ['unit · component · e2e', 'architecture · mutation'] }],
+  },
+  {
+    at: 6,
+    title: 'Worktrees & Merge Queues',
+    lines: ['one repo, n coding agents'],
+    note: 'we are here',
+  },
+  {
+    at: 7,
+    title: 'Dark Factory',
+    lines: ['lights out, nobody watching'],
+  },
+]

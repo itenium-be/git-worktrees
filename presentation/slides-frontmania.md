@@ -40,6 +40,21 @@ center: true
 
 ---
 layout: fm-content
+speakerTitle: The Claude Transformation Series
+naked: true
+clicks: 7
+---
+
+<script setup>
+import { series, seriesStages } from './components/termScenes.mjs'
+</script>
+
+<SeriesStrip :talks="series" :stages="seriesStages" :clicks="$clicks" />
+
+<!-- Three talks, one thread. Two of them are somebody else's evening — dim them and move on. Then the Dark Factory opens up and the whole series arc is on one line: the guardrails are the price of admission and they are assumed from here on, the middle box is the next twenty minutes, and the fleet is what it buys. -->
+
+---
+layout: fm-content
 speakerTitle: Before the AI craze
 bleed: true
 clicks: 3
