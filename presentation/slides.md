@@ -43,7 +43,7 @@ center: true
 layout: fm-content
 speakerTitle: The Claude Transformation Series
 naked: true
-clicks: 7
+clicks: 5
 ---
 
 <script setup>

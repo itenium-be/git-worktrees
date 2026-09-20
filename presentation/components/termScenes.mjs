@@ -550,27 +550,11 @@ export const risen = graves.map((g, i) => ({
 
 export const series = [
   {
-    sigil: '🏠',
-    title: 'Homelab',
-    subTitle: "I don't know networks, but Claude does!",
-    at: 1,
-    dimAt: 3,
-    hideAt: 4,
-  },
-  {
-    sigil: '🐧',
-    title: 'Linux Migration',
-    subTitle: 'How Claude made me abandon Windows',
-    at: 2,
-    dimAt: 3,
-    hideAt: 4,
-  },
-  {
     sigil: '🏭',
     title: 'Dark Factory',
     subTitle: 'I wanted a merge queue,<br> I ended up with a dark factory',
-    at: 3,
-    expandAt: 4,
+    at: 1,
+    expandAt: 2,
   },
 ]
 
@@ -578,19 +562,19 @@ export const series = [
 // what this talk is about, and where it lands.
 export const seriesStages = [
   {
-    at: 5,
+    at: 3,
     title: 'Guardrails & Backpressure',
     lines: ['lint & tsc dialed to 11'],
     groups: [{ label: 'Testing', lines: ['unit · component · e2e', 'architecture · mutation'] }],
   },
   {
-    at: 6,
+    at: 4,
     title: 'Worktrees & Merge Queues',
     lines: ['one repo, n coding agents'],
     note: 'we are here',
   },
   {
-    at: 7,
+    at: 5,
     title: 'Dark Factory',
     lines: ['lights out, nobody watching'],
   },
