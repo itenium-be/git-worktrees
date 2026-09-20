@@ -174,7 +174,7 @@ layout: fm-content
 speakerTitle: A New Problem Surfaces
 flicker: true
 naked: true
-clicks: 6
+clicks: 7
 ---
 
 <script setup>
@@ -183,7 +183,7 @@ import { mergeRace } from './components/termScenes.mjs'
 
 <MergeRace :lines="mergeRace" :clicks="$clicks" />
 
-<!-- One agent, one branch, and a main that will not hold still. Every lap is green; none of them lands. -->
+<!-- One agent, one branch, and a main that will not hold still. Every lap is green; none of them lands. It gives up on click 6 and asks to be told when it is safe; click 7 is me saying so by hand. That hand-signal is the merge queue, and it is the next slide. -->
 
 ---
 layout: fm-end

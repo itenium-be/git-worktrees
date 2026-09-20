@@ -492,9 +492,15 @@ export const mergeRace = [
   { at: 5, text: '  \u237f fatal: Not possible to fast-forward, aborting.', tone: 'dim' },
   { at: 5, text: '  main moved. Again. Rebasing.', tone: 'bad' },
   { at: 6, text: '' },
-  { at: 6, text: '> how long have you been doing this?', tone: 'you' },
-  { at: 6, text: '' },
-  { at: 6, text: '  40 minutes. The tests have been green the whole time.', tone: 'bad' },
+  { at: 6, text: '\u25cf Bash(git rebase main && bun test)', tone: 'tool' },
+  { at: 6, text: '  \u237f 6 conflicts resolved \u00b7 137 pass, 0 fail', tone: 'dim' },
+  { at: 6, text: "  I'm giving up. main moves faster than I can rebase onto it.", tone: 'bad' },
+  { at: 6, text: '  Tell me when nobody else is landing and I will merge then.', tone: 'bad' },
+  { at: 7, text: '' },
+  { at: 7, text: '> okay you can merge now', tone: 'you' },
+  { at: 7, text: '' },
+  { at: 7, text: '\u25cf Bash(git merge --ff-only feat/checkout)', tone: 'tool' },
+  { at: 7, text: '  \u237f Fast-forward. landed.', tone: 'ok' },
 ]
 
 export const graves = [
