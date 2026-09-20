@@ -628,7 +628,7 @@ export const finalThoughts = [
     lines: [
       { at: 1, kind: 'drop', text: 'run the suite on every merge' },
       { at: 2, kind: 'cost', text: 'main is red. a lot.' },
-      { at: 3, kind: 'keep', text: 'new dedicated agent for stabilization' },
+      { at: 3, kind: 'keep', text: 'fix-forward with a dedicated agent' },
     ],
   },
   {
