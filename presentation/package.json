@@ -7,7 +7,8 @@
     "dev:ide": "slidev slides-ide.md",
     "dev:tmux": "slidev slides-tmux.md",
     "build": "slidev build --base /git-worktrees/",
-    "export": "slidev export --format pptx --output ../git-worktrees.pptx --with-clicks=false"
+    "export": "slidev export --format pptx --output ../git-worktrees.pptx --with-clicks=false",
+    "dev:payoff": "slidev slides-payoff.md"
   },
   "dependencies": {
     "@slidev/cli": "^51.0.0"
