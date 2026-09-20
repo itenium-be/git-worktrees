@@ -14,8 +14,9 @@
     <!-- Speaker details live in headmatter, which never reaches a later slide's $frontmatter. -->
     <div class="fm-speaker" :class="{ flicker: $frontmatter.flicker }">
       <template v-if="$frontmatter.showSpeaker"
-        >{{ $frontmatter.speaker ?? $slidev.configs.speaker }}<span class="fm-dot"> ∙ </span></template
-      >{{ $frontmatter.speakerTitle ?? $slidev.configs.speakerTitle }}
+        >{{ $frontmatter.speaker ?? $slidev.configs.speaker
+        }}<span v-if="barTitle" class="fm-dot"> ∙ </span></template
+      >{{ barTitle }}
     </div>
     <img :src="logo" class="fm-badge" alt="FrontMania" />
     <div class="fm-card" :class="{ bleed: $frontmatter.bleed, center: $frontmatter.center, naked: $frontmatter.naked, spill: $frontmatter.spill }"><slot /></div>
@@ -55,6 +56,7 @@ provide('fmDawn', raised)
 // $slidev and $frontmatter have to come from here.
 const { $slidev, $frontmatter } = useSlideContext()
 const level = computed(() => ($frontmatter.dawn ? 1 : raised.value))
+const barTitle = computed(() => $frontmatter.speakerTitle ?? $slidev.configs.speakerTitle)
 </script>
 
 <style scoped>

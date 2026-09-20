@@ -18,10 +18,11 @@ git worktrees & merge queues
 ---
 layout: fm-content
 showSpeaker: true
+speakerTitle: ""
 center: true
 ---
 
-# One Repo, N Coding Agents
+# Git worktrees<br>One Repo, N Coding Agents
 
 <v-click>
 
