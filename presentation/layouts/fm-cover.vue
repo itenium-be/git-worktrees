@@ -38,9 +38,18 @@ const logo = new URL('../images/frontmania/logo.png', import.meta.url).href
 
 .fm-cover-slot {
   position: absolute;
-  inset: auto 0 4% 0;
+  inset: auto 0 1.8% 0;
   z-index: 1;
   text-align: center;
   color: #fff;
+}
+
+/* The backdrop is a photograph, so the talk title carries its own contrast. */
+.fm-cover-slot :deep(p) {
+  margin: 0;
+  font-size: 2.4rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-shadow: 0 0.15rem 1rem rgba(0, 0, 0, 0.75);
 }
 </style>

@@ -13,6 +13,8 @@ speaker: Wouter Van Schandevijl
 speakerTitle: Git Worktrees
 ---
 
+git worktrees & merge queues
+
 ---
 layout: fm-content
 showSpeaker: true
