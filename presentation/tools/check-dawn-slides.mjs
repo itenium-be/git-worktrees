@@ -1,5 +1,5 @@
 // Asserts the `dawn: true` slides render as intended, and that nothing dawn leaks onto the rest.
-// Usage: node tools/check-dawn-slides.mjs [port]   (against a running `bun run dev:frontmania`)
+// Usage: node tools/check-dawn-slides.mjs [port]   (against a running `bun run dev`)
 import { chromium } from 'playwright-chromium'
 
 const BASE = `http://127.0.0.1:${process.argv[2] ?? 3030}`

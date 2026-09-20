@@ -1,5 +1,5 @@
 // Asserts the closing slide carries a scannable QR to the talk's repo, clear of the other marks.
-// Usage: node tools/check-end-slide.mjs [port]   (against a running `bun run dev:frontmania`)
+// Usage: node tools/check-end-slide.mjs [port]   (against a running `bun run dev`)
 import { chromium } from 'playwright-chromium'
 import { encode } from 'uqr'
 

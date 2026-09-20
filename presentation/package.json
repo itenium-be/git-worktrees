@@ -2,7 +2,6 @@
   "private": true,
   "scripts": {
     "dev": "slidev",
-    "dev:frontmania": "slidev slides-frontmania.md",
     "build": "slidev build --base /git-worktrees/",
     "export": "slidev export --format pptx --output ../git-worktrees.pptx --with-clicks=false"
   },
