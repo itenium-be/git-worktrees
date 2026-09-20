@@ -2,18 +2,22 @@
   <div class="slidev-layout fm-end">
     <img :src="backdrop" class="fm-backdrop" aria-hidden="true" />
     <h1 class="fm-end-title"><slot>Thanks for your attention</slot></h1>
-    <div class="fm-social">
-      <img :src="xIcon" class="fm-x" alt="X" />
-      <span class="fm-hash">#FrontMania</span>
-    </div>
     <img :src="logo" class="fm-end-logo" alt="FrontMania Conference 2026" />
+    <div class="fm-end-qr"><QRCode :url="repo" /></div>
+    <a :href="repo" class="fm-end-qr-link">github.com/{{ source }}</a>
   </div>
 </template>
 
 <script setup>
+import { computed } from 'vue'
+import { useSlideContext } from '@slidev/client'
+
+const { $frontmatter } = useSlideContext()
+const source = computed(() => $frontmatter.source ?? 'itenium-be/git-worktrees')
+const repo = computed(() => `https://github.com/${source.value}`)
+
 const backdrop = new URL('../images/frontmania/backdrop.jpg', import.meta.url).href
 const logo = new URL('../images/frontmania/logo.png', import.meta.url).href
-const xIcon = new URL('../images/frontmania/x.png', import.meta.url).href
 </script>
 
 <style scoped>
@@ -46,31 +50,40 @@ const xIcon = new URL('../images/frontmania/x.png', import.meta.url).href
   color: #fff;
 }
 
-.fm-social {
+/* White plate: the QR is dark-on-transparent, and the backdrop is a night scene. */
+.fm-end-qr {
   position: absolute;
-  left: 0;
-  top: 39%;
-  width: 100%;
+  left: 11%;
+  top: 40%;
+  width: 26%;
+  aspect-ratio: 1;
   z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  font-size: 1.5rem;
-  color: var(--fm-cyan);
+  box-sizing: border-box;
+  padding: 0.9rem;
+  border-radius: 0.8rem;
+  background: #fff;
 }
 
-.fm-x {
-  height: 1.4rem;
-  width: auto;
+/* Shrink-wrapped and pulled back by half: the link is wider than the QR, so a box
+   of the QR's width would overflow to one side and read as off-centre. */
+.fm-end-qr-link {
+  position: absolute;
+  left: 24%;
+  top: 88%;
+  z-index: 1;
+  transform: translateX(-50%);
+  font-size: 1.05rem;
+  white-space: nowrap;
+  color: var(--fm-cyan);
+  text-decoration: none;
 }
 
 .fm-end-logo {
   position: absolute;
-  left: 39.1%;
-  top: 56.9%;
-  width: 21.7%;
-  height: 36%;
+  left: 60%;
+  top: 40%;
+  width: 32%;
+  height: 46%;
   z-index: 1;
   object-fit: contain;
 }
