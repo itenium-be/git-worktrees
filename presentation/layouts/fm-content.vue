@@ -309,7 +309,7 @@ const level = computed(() => ($frontmatter.dawn ? 1 : raised.value))
 }
 
 .fm-content.dawn .fm-card:not(.naked) {
-  background: rgba(255, 249, 238, 0.93);
+  background: rgba(255, 249, 238, 0.72);
   border-color: #E8A33D;
   color: var(--fm-ink);
   box-shadow: 0 1.5em 4em rgba(90, 50, 20, 0.35);
