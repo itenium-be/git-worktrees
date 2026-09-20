@@ -201,6 +201,21 @@ import { branchPool } from './components/termScenes.mjs'
 <!-- Runs on its own — talk over it. One lane, one branch at a time, and main only ever grows. Bors did this in 2014; GitHub, Mergify and Graphite sell it; a session told it is the only one allowed to touch main is the same thing. -->
 
 ---
+layout: fm-content
+speakerTitle: Final Thoughts
+naked: true
+clicks: 7
+---
+
+<script setup>
+import { finalThoughts } from './components/termScenes.mjs'
+</script>
+
+<FinalThoughts :columns="finalThoughts" :clicks="$clicks" />
+
+<!-- Same move, twice: stop gating every change, sample periodically instead. The lander is the bottleneck, so take the tests out of it and admit main will be red most of the day — the green comes from a stabilization pass, not from every merge. Optimistic merging, the C4 name for it. Then the same question about review: nobody is reading how the function got written, so spend the attention on what the agent cannot check for itself. -->
+
+---
 layout: fm-end
 source: itenium-be/git-worktrees
 ---

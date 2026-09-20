@@ -621,3 +621,25 @@ export const branchPool = [
   'fix/empty-state',
   'chore/tsconfig',
 ]
+
+export const finalThoughts = [
+  {
+    title: 'Merge queue as next bottleneck?',
+    lines: [
+      { at: 1, kind: 'drop', text: 'run the suite on every merge' },
+      { at: 2, kind: 'cost', text: 'main is red. a lot.' },
+      { at: 3, kind: 'keep', text: 'new dedicated agent for stabilization' },
+    ],
+  },
+  {
+    title: 'But.. What about code review?',
+    wide: true,
+    lines: [
+      { at: 4, kind: 'drop', text: 'how a function or class is implemented' },
+      { at: 5, kind: 'cost', text: 'nobody reads that diff anymore' },
+      { at: 6, kind: 'keep', text: 'human review for' },
+    ],
+    tagsAt: 7,
+    tags: ['security', 'architecture', 'performance', 'test quality', 'API surface'],
+  },
+]
