@@ -9,6 +9,7 @@ type: Theoretical
 aspectRatio: 16/9
 layout: fm-cover
 speaker: Wouter Van Schandevijl
+brand: itenium
 speakerTitle: Dark Factory
 ---
 

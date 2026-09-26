@@ -18,7 +18,8 @@
         }}<span v-if="barTitle" class="fm-dot"> ∙ </span></template
       >{{ barTitle }}
     </div>
-    <img :src="logo" class="fm-badge" alt="FrontMania" />
+    <img v-if="itenium" :src="iteniumLogo" class="fm-badge itenium" alt="itenium" />
+    <img v-else :src="logo" class="fm-badge" alt="FrontMania" />
     <div class="fm-card" :class="{ bleed: $frontmatter.bleed, center: $frontmatter.center, naked: $frontmatter.naked, spill: $frontmatter.spill }"><slot /></div>
   </div>
 </template>
@@ -31,6 +32,7 @@ const backdrop = new URL('../images/frontmania/backdrop.jpg', import.meta.url).h
 // The same valley at sunrise. Swap in backdrop-dawn-balloon.webp for the other take.
 const dawnBackdrop = new URL('../images/frontmania/backdrop-dawn.webp', import.meta.url).href
 const logo = new URL('../images/frontmania/logo.png', import.meta.url).href
+const iteniumLogo = new URL('../theme/assets/logo-full-white.svg', import.meta.url).href
 
 const birds = [
   { top: '14%', width: '1.4%', animationDuration: '41s', animationDelay: '-6s' },
@@ -56,6 +58,8 @@ provide('fmDawn', raised)
 // $slidev and $frontmatter have to come from here.
 const { $slidev, $frontmatter } = useSlideContext()
 const level = computed(() => ($frontmatter.dawn ? 1 : raised.value))
+// A deck's headmatter `brand: itenium` swaps the FrontMania badge for the itenium logo.
+const itenium = computed(() => $slidev.configs.brand === 'itenium')
 const barTitle = computed(() => $frontmatter.speakerTitle ?? $slidev.configs.speakerTitle)
 </script>
 
@@ -113,6 +117,14 @@ const barTitle = computed(() => $frontmatter.speakerTitle ?? $slidev.configs.spe
   height: 17.4%;
   z-index: 2;
   object-fit: contain;
+}
+
+.fm-badge.itenium {
+  left: 83%;
+  top: 7.5%;
+  width: 13%;
+  height: 6%;
+  filter: drop-shadow(0 0.15rem 0.4rem rgba(0, 0, 0, 0.7));
 }
 
 .fm-card {

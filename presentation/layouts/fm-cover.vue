@@ -1,14 +1,22 @@
 <template>
   <div class="slidev-layout fm-cover">
     <img :src="backdrop" class="fm-backdrop" aria-hidden="true" />
-    <img :src="logo" class="fm-cover-logo" alt="FrontMania Conference 2026" />
+    <img v-if="itenium" :src="iteniumLogo" class="fm-cover-logo itenium" alt="itenium" />
+    <img v-else :src="logo" class="fm-cover-logo" alt="FrontMania Conference 2026" />
     <div class="fm-cover-slot"><slot /></div>
   </div>
 </template>
 
 <script setup>
+import { computed } from 'vue'
+import { useSlideContext } from '@slidev/client'
+
 const backdrop = new URL('../images/frontmania/backdrop.jpg', import.meta.url).href
 const logo = new URL('../images/frontmania/logo.png', import.meta.url).href
+const iteniumLogo = new URL('../theme/assets/logo-full-white.svg', import.meta.url).href
+
+const { $slidev } = useSlideContext()
+const itenium = computed(() => $slidev.configs.brand === 'itenium')
 </script>
 
 <style scoped>
@@ -34,6 +42,14 @@ const logo = new URL('../images/frontmania/logo.png', import.meta.url).href
   width: 46.8%;
   height: 77.4%;
   object-fit: contain;
+}
+
+.fm-cover-logo.itenium {
+  left: 22%;
+  top: 30%;
+  width: 56%;
+  height: 26%;
+  filter: drop-shadow(0 0.4rem 1.2rem rgba(0, 0, 0, 0.8));
 }
 
 .fm-cover-slot {
