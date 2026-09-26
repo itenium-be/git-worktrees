@@ -3,6 +3,6 @@
 
 # Slidev
 presentation/node_modules/
-presentation/dist/
+presentation/dist*/
 presentation/.slidev/
 presentation/migration/

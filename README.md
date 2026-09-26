@@ -8,6 +8,7 @@ when they share a checkout, what `git worktree` brings back, and why merging bec
 bottleneck.
 
 - [Elevator pitch](ElevatorPitch.md) — abstract, audience, takeaways
+- [Dark Factory demo](DarkFactoryDemo.md) — the live build that runs through the three-deck session
 
 ## Presentation
 
@@ -23,7 +24,18 @@ cd presentation/theme
 git pull
 ```
 
-The deck is `presentation/slides.md`. Every visual slide is a local Vue component in
+The Dark Factory session runs three decks from the same project, in this order:
+
+| Deck                             | Run                         |
+| -------------------------------- | --------------------------- |
+| `presentation/guardrails.md`     | `bun run dev:guardrails`    |
+| `presentation/slides.md`         | `bun run dev`               |
+| `presentation/dark-factory.md`   | `bun run dev:dark-factory`  |
+
+The live demo that runs through all three — prompts, bead hold, deploy — is
+[`DarkFactoryDemo.md`](DarkFactoryDemo.md).
+
+The worktrees deck is `presentation/slides.md`. Every visual slide is a local Vue component in
 `presentation/components/`, and all of their content — terminal panes, gravestones, merge-race
 lines, queue branches — lives in `presentation/components/termScenes.mjs`.
 

@@ -3,7 +3,13 @@
   "scripts": {
     "dev": "slidev",
     "build": "slidev build --base /git-worktrees/",
-    "export": "slidev export --format pptx --output ../git-worktrees.pptx --with-clicks=false"
+    "export": "slidev export --format pptx --output ../git-worktrees.pptx --with-clicks=false",
+    "dev:guardrails": "slidev guardrails.md",
+    "dev:dark-factory": "slidev dark-factory.md",
+    "build:guardrails": "slidev build guardrails.md --base /guardrails/ --out dist-guardrails",
+    "build:dark-factory": "slidev build dark-factory.md --base /dark-factory/ --out dist-dark-factory",
+    "export:guardrails": "slidev export guardrails.md --format pptx --output ../guardrails.pptx --with-clicks=false",
+    "export:dark-factory": "slidev export dark-factory.md --format pptx --output ../dark-factory.pptx --with-clicks=false"
   },
   "dependencies": {
     "@slidev/cli": "^51.0.0"
