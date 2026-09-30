@@ -133,6 +133,11 @@ import { answered } from './components/guardrailsScenes.mjs'
 
 <Graveyard :stones="answered" :weather="$clicks" :clicks="$clicks" />
 
+<!--
+- Backpressure: the agent cannot proceed
+- Not "is told to", not "is warned" — a warning is documentation
+-->
+
 ---
 layout: fm-content
 speakerTitle: "LSP: Language Server Protocol"
@@ -145,6 +150,11 @@ import { lspDiagnostics } from './components/guardrailsScenes.mjs'
 </script>
 
 <Terminal :tabs="lspDiagnostics" :clicks="$clicks" />
+
+<!--
+- It *chose* to fix them — still a prayer
+- Next: make it not a choice
+-->
 
 ---
 layout: fm-content
@@ -239,6 +249,12 @@ import { guarding } from './components/guardrailsScenes.mjs'
 
 <Terminal :tabs="guarding" :clicks="$clicks" />
 
+<!--
+- reviewer: e.g. AI review in CI — sees the whole diff, not one tool call
+- lint-budget: ratchet — disable count may only go down
+- (click) Did it win, or did we?
+-->
+
 ---
 layout: fm-content
 speakerTitle: Guarding The Guardrails
@@ -303,6 +319,13 @@ center: true
 ## Keep your prompts DRY
 
 </v-click>
+
+<!--
+- Stop repeating the same correction in prompts
+- Compounding Engineering: every mistake becomes a guardrail, so it can't recur
+- `<select>` isn't themeable → BannedSymbols
+- `<a>`/`<button>` without pointer cursor → frontend test
+-->
 
 ---
 layout: fm-content
