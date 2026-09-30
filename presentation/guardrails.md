@@ -292,227 +292,197 @@ center: true
 
 ---
 layout: fm-content
-speakerTitle: The Problem
+speakerTitle: More Guardrails?
 center: true
 ---
 
-# so: stop reading the code
+# Compounding Engineering
 
 <v-click>
 
-## not nihilism — reallocation
+## Keep your prompts DRY
 
 </v-click>
 
 ---
 layout: fm-content
-speakerTitle: Reallocate The Attention
-naked: true
-clicks: 8
----
-
-<script setup>
-import { reallocation } from './components/guardrailsScenes.mjs'
-</script>
-
-<FinalThoughts :columns="reallocation" :clicks="$clicks" />
-
-<!--
-- Human attention is the only scarce resource left
-- (click ×3) the machine takes everything cheap to fix
-- (click ×4) the human keeps what compounds
-- A badly named variable is a five-minute fix, forever
-- A leaked credential, a published API, a wrong seam — compound interest
--->
-
----
-layout: fm-content
-speakerTitle: We're Not Complete Animals
+speakerTitle: Code Review
 center: true
-dawn: true
 ---
 
-# giving up line-by-line review<br>is not giving up on quality
+<div class="qa">
+  <v-click at="1">
+    <div>
+      <p class="q">Do you care about CSS?</p>
+      <v-click at="2">
+        <p class="a">As long as it looks exactly like you want?</p>
+      </v-click>
+    </div>
+  </v-click>
+  <v-click at="3">
+    <div>
+      <p class="q">Do you care about Frontend?</p>
+      <v-click at="4">
+        <p class="a">As long as it does exactly what you want?</p>
+      </v-click>
+    </div>
+  </v-click>
+  <v-click at="5">
+    <div>
+      <p class="q">Do you care about the Database?</p>
+      <v-click at="6">
+        <p class="a">As long as it's performant and normalized?</p>
+      </v-click>
+    </div>
+  </v-click>
+</div>
 
-<v-click>
+<v-click at="7">
 
-## it moves quality from a human bottleneck<br>to a mechanical one
+# I don't care and I'm not looking
 
 </v-click>
 
----
-layout: fm-content
-speakerTitle: Two Rules
-naked: true
-clicks: 7
----
-
-<script setup>
-import { twoRules } from './components/guardrailsScenes.mjs'
-</script>
-
-<FinalThoughts :columns="twoRules" :clicks="$clicks" />
-
-<!--
-- Backpressure: the agent cannot proceed, not that it feels discouraged
-- When I catch something by hand, the lesson is never "review more"
--->
-
----
-layout: fm-content
-speakerTitle: Lint & tsc, Dialed To 11
-naked: true
-clicks: 6
----
-
-<script setup>
-import { dialedTo11 } from './components/guardrailsScenes.mjs'
-</script>
-
-<FinalThoughts :columns="dialedTo11" :clicks="$clicks" />
-
-<!--
-- This is Portal, the app being built live behind me
-- Every rule a human would find annoying, an agent does not
-- An agent never argues with the linter; it just fixes it
--->
-
----
-layout: fm-content
-speakerTitle: The Guardrail Explains Itself
-bleed: true
-clicks: 2
----
-
-<script setup>
-import { bannedSymbols } from './components/guardrailsScenes.mjs'
-</script>
-
-<Terminal :tabs="bannedSymbols" :clicks="$clicks" />
-
-<!--
-- BannedSymbols.txt: every entry carries its reason
-- (click) The build says no
-- (click) And the error message is the prompt — the agent reads why, and fixes it the right way
-- A rule without a reason gets worked around; a rule with one gets followed
--->
-
----
-layout: fm-content
-speakerTitle: Architecture, As A Test
-naked: true
-clicks: 5
----
-
-<script setup>
-import { archTests } from './components/guardrailsScenes.mjs'
-</script>
-
-<FinalThoughts :columns="archTests" :clicks="$clicks" />
-
-<!--
-- The controller reaching straight into the database, because the short path was shorter
-- Now that path does not compile into a green suite
--->
-
----
-layout: fm-content
-speakerTitle: Tests That Test Something
-naked: true
-clicks: 6
----
-
-<script setup>
-import { testing } from './components/guardrailsScenes.mjs'
-</script>
-
-<FinalThoughts :columns="testing" :clicks="$clicks" />
-
-<!--
-- (click 5) The one that matters against agents
-- They mock the unit under test and produce a test that passes forever
-- Mutation testing answers the only question left: did these tests test anything?
--->
-
----
-layout: fm-content
-speakerTitle: Security
-center: true
-flicker: true
----
-
-# security is the absence of behaviour
-
-<v-click>
-
-## and the agent optimises for behaviour
-
-</v-click>
-
-<!--
-- Auth on every endpoint except the one added last Tuesday
-- Loads the record by id from the request, never checks who owns it
-- Nothing fails when the authorisation check is missing — the feature works, the tests pass, the demo is great
-- There is no signal in the agent's definition of done, so it has to be mechanical
--->
-
----
-layout: fm-content
-speakerTitle: Architecture
-center: true
-flicker: true
----
-
-# the agent has local context<br>and no taste
-
-<v-click>
-
-## it sees the files it opened, not the system
-
-</v-click>
-
-<v-click>
-
-<p class="aside">hold that thought</p>
-
+<v-click at="8">
+  <p class="aside">(maybe do keep an eye on the database)</p>
 </v-click>
 
 <style>
+.qa {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-bottom: 1.4rem;
+}
+
+.qa .q {
+  margin: 0;
+  line-height: 1.2;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #5fc3db;
+}
+
+.qa .a {
+  margin: 0;
+  line-height: 1.2;
+  font-size: 1.2rem;
+  font-style: italic;
+  opacity: 0.6;
+}
+
+h1 {
+  font-size: 2.4rem !important;
+}
+
 .aside {
-  margin-top: 1.5rem;
-  font-size: 1.4rem;
+  margin: 0;
+  font-size: 1.2rem;
   font-style: italic;
   opacity: 0.55;
 }
 </style>
 
-<!--
-- Writes a second UserService because it never found the first
-- Architecture is a global property, agents operate locally
-- Not a knowledge problem, a vantage point problem — a better prompt does not fix it
-- (click) A role whose whole job is the global view: that is the dark factory
--->
-
 ---
 layout: fm-content
-speakerTitle: Where The Memory Lives
+speakerTitle: Code Review
 center: true
-dawn: true
 ---
 
-# told an agent something twice?<br>it belongs in the repo
-
-<v-click>
-
-## and better than prose: a check that fails
-
+<v-click at="1">
+  <p class="q">Do you care about Backend?</p>
+</v-click>
+<v-click at="2">
+  <p class="a">Uhm... I'm not sure.</p>
 </v-click>
 
-<!--
-- Sessions end; a lesson in session context dies with it
-- A convention that is merely documented is optional
-- Guardrails are not just quality control — they are how the system remembers
--->
+<v-click at="3">
+  <p class="lead">I know I do care about:</p>
+</v-click>
+
+<div class="cares">
+  <v-click at="4">
+    <div class="care">
+      <div class="title">Security</div>
+      <div class="line">Does that really work as intended?</div>
+    </div>
+  </v-click>
+  <v-click at="5">
+    <div class="care">
+      <div class="title">API Surface</div>
+      <div class="line">How chatty or chunky are we?</div>
+    </div>
+  </v-click>
+  <v-click at="6">
+    <div class="care">
+      <div class="title">Architecture</div>
+      <div class="line">Can we continue building at this speed?</div>
+    </div>
+  </v-click>
+</div>
+
+<v-click at="7">
+  <p class="outro">But how some function or class is implemented? /care</p>
+</v-click>
+
+<style>
+.q {
+  margin: 0;
+  line-height: 1.2;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #5fc3db;
+}
+
+.a {
+  margin: 0;
+  line-height: 1.2;
+  font-size: 1.2rem;
+  font-style: italic;
+  opacity: 0.6;
+}
+
+.lead {
+  margin: 2rem 0 1rem;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.cares {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  width: 100%;
+}
+
+.care {
+  height: 100%;
+  box-sizing: border-box;
+  padding: 1.2rem 1rem;
+  border: 2px solid #5fc3db;
+  border-radius: 1rem;
+  background: rgba(95, 195, 219, 0.07);
+}
+
+.care .title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #f5b642;
+}
+
+.care .line {
+  margin-top: 0.4rem;
+  font-size: 1.05rem;
+  opacity: 0.8;
+}
+
+.outro {
+  margin: 1.6rem 0 0;
+  font-size: 1.2rem;
+  font-style: italic;
+  opacity: 0.6;
+}
+</style>
 
 ---
 layout: fm-end
