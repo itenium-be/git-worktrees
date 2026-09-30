@@ -63,3 +63,19 @@ the current deck. The arguments survive; the slide numbers do not.
 [proto]:    docs/prototypes/
 [mj]:       docs/midjourney-raw/
 [fm]:       docs/FrontMania/
+
+## Backpressure
+
+Old term from streams and queues; popularised for coding agents by Geoffrey Huntley's Ralph loop.
+
+| Source                                       | What                                                   |
+| -------------------------------------------- | ------------------------------------------------------ |
+| [Huntley: Ralph][ralph]                      | 2025-07-14 — earliest agent use found                  |
+| [LinearB: Ralph loops][linearb]              | Huntley's "back pressure engineering"                  |
+| [Moss: Don't waste your back pressure][moss] | 2026-01-17 — stop being the agent's human backpressure |
+| [SSW rule: back pressure for agents][ssw]    | Back pressure as AI guardrails                         |
+
+[ralph]:   https://ghuntley.com/ralph/
+[linearb]: https://linearb.io/blog/ralph-loop-agentic-engineering-geoffrey-huntley
+[moss]:    https://banay.me/dont-waste-your-backpressure/
+[ssw]:     https://www.ssw.com.au/rules/utilize-back-pressure-for-agents
