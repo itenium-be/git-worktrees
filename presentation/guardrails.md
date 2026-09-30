@@ -524,6 +524,113 @@ center: true
 </style>
 
 ---
+layout: fm-content
+speakerTitle: Audit, Don't Review
+naked: true
+center: true
+---
+
+<div class="audit-row">
+  <v-click at="1">
+    <div class="audit-box">
+      <div class="audit-when">Per Feature</div>
+      <div class="audit-who">Guardrails</div>
+      <div class="audit-line">Automatic · Blocking · Every time</div>
+    </div>
+  </v-click>
+  <v-click at="2">
+    <div class="audit-box">
+      <div class="audit-when">Periodically</div>
+      <div class="audit-who">Human audit</div>
+      <div class="audit-cares">
+        <div class="care">Security</div>
+        <div class="care">Architecture</div>
+        <div class="care">API Surface</div>
+      </div>
+      <div class="audit-line">When it smells, or every N features</div>
+    </div>
+  </v-click>
+</div>
+
+<v-click at="3">
+  <div class="audit-feedback">Every recurring finding → a new guardrail, where you can</div>
+</v-click>
+
+<!--
+- Claude is bad at growing architecture and at security; burned by both
+- API surface = cost + performance
+- [war story: TODO]
+-->
+
+<style>
+.audit-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.audit-box {
+  height: 100%;
+  box-sizing: border-box;
+  padding: 1.4rem 1.8rem;
+  border: 2px solid #5fc3db;
+  border-radius: 1.25rem;
+  background: rgba(29, 29, 27, 0.88);
+}
+
+.audit-when {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.audit-who {
+  font-family: var(--font-heading);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #5fc3db;
+}
+
+.audit-cares {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.care {
+  padding: 0.4rem 1rem;
+  border: 2px solid #5fc3db;
+  border-radius: 1rem;
+  background: rgba(95, 195, 219, 0.07);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #f5b642;
+}
+
+.audit-line {
+  margin-top: 1rem;
+  font-size: 1.05rem;
+  opacity: 0.8;
+}
+
+.audit-feedback {
+  margin-top: 1.2rem;
+  padding: 0.8rem 2rem;
+  border: 2px solid #5fc3db;
+  border-radius: 1.25rem;
+  background: rgba(29, 29, 27, 0.88);
+  font-family: var(--font-heading);
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #fff;
+  text-align: center;
+}
+</style>
+
+---
 layout: fm-end
 source: itenium-be/git-worktrees
 ---
