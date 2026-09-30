@@ -563,20 +563,27 @@ export const series = [
 export const seriesStages = [
   {
     at: 3,
-    title: 'Guardrails & Backpressure',
+    title: 'Guardrails<br>&<br>Backpressure',
     lines: ['lint & tsc dialed to 11'],
     groups: [{ label: 'Testing', lines: ['unit · component · e2e', 'architecture · mutation'] }],
   },
   {
     at: 4,
-    title: 'Worktrees & Merge Queues',
+    title: 'Worktrees<br>&<br>Merge Queues',
     lines: ['one repo, n coding agents'],
     note: 'we are here',
   },
   {
     at: 5,
-    title: 'Dark Factory',
+    title: 'A Graph<br>&<br>A Loop',
     lines: ['lights out, nobody watching'],
+    fine: {
+      at: 6,
+      text:
+        '& dedicated agents, specs, acceptance criteria, atomic claims, adversarial review, human gates, ' +
+        'production feedback, context hygiene, identity, recovery, stuck detection, dashboarding, ' +
+        'an off-switch, a token budget',
+    },
   },
 ]
 

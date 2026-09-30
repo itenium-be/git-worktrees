@@ -17,13 +17,18 @@
           <template v-for="(s, j) in stages" :key="j">
             <div v-if="j" class="joiner" :class="{ on: clicks >= s.at }">+</div>
             <div class="stage" :class="{ on: clicks >= s.at, here: s.note }">
-              <div class="stage-title">{{ s.title }}</div>
-              <p v-for="(line, k) in s.lines" :key="k" class="stage-line">{{ line }}</p>
-              <div v-for="(g, k) in s.groups ?? []" :key="'g' + k" class="stage-group">
-                <div class="group-label">{{ g.label }}</div>
-                <p v-for="(line, m) in g.lines" :key="m" class="stage-line">{{ line }}</p>
+              <div class="stage-title" v-html="s.title" />
+              <div class="stage-body">
+                <p v-for="(line, k) in s.lines" :key="k" class="stage-line">{{ line }}</p>
+                <div v-for="(g, k) in s.groups ?? []" :key="'g' + k" class="stage-group">
+                  <div class="group-label">{{ g.label }}</div>
+                  <p v-for="(line, m) in g.lines" :key="m" class="stage-line">{{ line }}</p>
+                </div>
+                <div class="stage-foot">
+                  <p v-if="s.fine" class="stage-fine" :class="{ on: clicks >= s.fine.at }">{{ s.fine.text }}</p>
+                  <div v-if="s.note" class="stage-note">{{ s.note }}</div>
+                </div>
               </div>
-              <div v-if="s.note" class="stage-note">{{ s.note }}</div>
             </div>
           </template>
         </div>
@@ -219,13 +224,13 @@ watch(
   opacity: 1;
 }
 
+/* Equal outer rows put every title on the box's midline, whatever each stage carries below it. */
 .stage {
   flex: 1;
   min-width: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  grid-template-rows: 1fr auto 1fr;
+  justify-items: center;
   padding: 1rem 0.8rem;
   box-sizing: border-box;
   border: 1px solid rgba(95, 195, 219, 0.55);
@@ -248,6 +253,7 @@ watch(
 }
 
 .stage-title {
+  grid-row: 2;
   font-family: var(--font-heading);
   font-size: 1.25rem;
   font-weight: 700;
@@ -256,6 +262,33 @@ watch(
 
 .stage.here .stage-title {
   color: var(--lit);
+}
+
+.stage-body {
+  grid-row: 3;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stage-foot {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stage-fine {
+  margin: 0.6rem 0 0;
+  font-size: 0.5rem;
+  line-height: 1.3;
+  opacity: 0;
+  transition: opacity 500ms ease;
+}
+
+.stage-fine.on {
+  opacity: 0.6;
 }
 
 .stage-line {
