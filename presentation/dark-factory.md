@@ -372,6 +372,45 @@ dawn: true
 </v-click>
 
 ---
+layout: fm-content
+speakerTitle: Future?
+center: true
+---
+
+| Add                  | What it would be                                            |
+| -------------------- | ----------------------------------------------------------- |
+| **Stuck detection**  | a window that stops mid-bead, noticed and restarted          |
+| **A token budget**   | a concurrency cap, cost per bead                             |
+| **Sandboxing**       | permissions, no prod credentials within an agent's reach     |
+| **Feature flags**    | land dark, switch on later                                   |
+| **Rollback**         | what happens when a landed bead breaks prod                  |
+| **Self-improvement** | a lesson caught by hand becomes a new check or skill         |
+
+<style>
+table {
+  border-collapse: collapse;
+  font-size: 1.15rem;
+  background: rgba(29, 29, 27, 0.88);
+  border: 2px solid #5fc3db;
+  border-radius: 1.25rem;
+}
+
+th {
+  color: #5fc3db;
+  text-align: left;
+}
+
+th, td {
+  padding: 0.55rem 1.4rem;
+  border-bottom: 1px solid rgba(95, 195, 219, 0.25);
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+</style>
+
+---
 layout: fm-end
 source: itenium-be/git-worktrees
 ---
