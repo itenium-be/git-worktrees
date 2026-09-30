@@ -20,6 +20,7 @@
               <div class="stage-title" v-html="s.title" />
               <div class="stage-body">
                 <p v-for="(line, k) in s.lines" :key="k" class="stage-line">{{ line }}</p>
+                <p v-if="s.quip" class="stage-quip">{{ s.quip }}</p>
                 <div v-for="(g, k) in s.groups ?? []" :key="'g' + k" class="stage-group">
                   <div class="group-label">{{ g.label }}</div>
                   <p v-for="(line, m) in g.lines" :key="m" class="stage-line">{{ line }}</p>
@@ -229,7 +230,7 @@ watch(
   flex: 1;
   min-width: 0;
   display: grid;
-  grid-template-rows: 1fr auto 1fr;
+  grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr);
   justify-items: center;
   padding: 1rem 0.8rem;
   box-sizing: border-box;
@@ -295,6 +296,13 @@ watch(
   margin: 0.35rem 0 0;
   font-size: 0.95rem;
   opacity: 0.8;
+}
+
+.stage-quip {
+  margin: 0.2rem 0 0;
+  font-size: 0.75rem;
+  font-style: italic;
+  opacity: 0.6;
 }
 
 .stage-group {

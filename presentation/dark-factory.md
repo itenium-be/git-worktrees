@@ -17,31 +17,7 @@ dark factory
 
 ---
 layout: fm-content
-showSpeaker: true
-speakerTitle: ""
-center: true
----
-
-# Dark Factory<br>Lights Out, Nobody Watching
-
-<v-click>
-
-<p class="aside">I wanted a merge queue, I ended up with a dark factory</p>
-
-</v-click>
-
-<style>
-.aside {
-  margin-top: 1.5rem;
-  font-size: 1.4rem;
-  font-style: italic;
-  opacity: 0.55;
-}
-</style>
-
----
-layout: fm-content
-speakerTitle: The Claude Transformation Series
+speakerTitle: The Dark Factory
 naked: true
 clicks: 5
 ---
