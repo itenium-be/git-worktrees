@@ -309,8 +309,12 @@ center: true
 ---
 layout: fm-content
 speakerTitle: More Guardrails?
+naked: true
 center: true
+dawn: true
 ---
+
+<div class="sun-box">
 
 # Compounding Engineering
 
@@ -320,12 +324,24 @@ center: true
 
 </v-click>
 
+</div>
+
 <!--
 - Stop repeating the same correction in prompts
 - Compounding Engineering: every mistake becomes a guardrail, so it can't recur
 - `<select>` isn't themeable → BannedSymbols
 - `<a>`/`<button>` without pointer cursor → frontend test
 -->
+
+<style>
+.sun-box {
+  padding: 2rem 3rem;
+  border: 2px solid #E8A33D;
+  border-radius: 1.25rem;
+  background: rgba(255, 249, 238, 0.72);
+  box-shadow: 0 1.5em 4em rgba(90, 50, 20, 0.35);
+}
+</style>
 
 ---
 layout: fm-content
