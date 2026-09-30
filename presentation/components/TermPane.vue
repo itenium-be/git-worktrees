@@ -7,16 +7,29 @@
   </div>
 
   <div v-else class="term-pane">
-    <pre class="term-text" :class="{ focused: node.focusAt != null && clicks >= node.focusAt, alert: node.alert }">{{ node.lines.join('\n') }}</pre>
+    <pre
+      class="term-text"
+      :class="{ focused: node.focusAt != null && clicks >= node.focusAt, alert: node.alert }"
+      :style="{ fontSize: node.fontSize }"
+    ><span v-for="(l, i) in shown" :key="i" :class="{ muted: l.muted }">{{ l.text }}{{ i < shown.length - 1 ? '\n' : '' }}</span></pre>
     <div v-if="node.label" class="term-label" :class="{ show: clicks >= node.at }">{{ node.label }}</div>
   </div>
 </template>
 
 <script setup>
-defineProps({
+import { computed } from 'vue'
+
+const props = defineProps({
   node: { type: Object, required: true },
   clicks: { type: Number, default: 0 },
 })
+
+// A line is a plain string, or `{ at, text, muted }` to hold it back until that click.
+const shown = computed(() =>
+  (props.node.lines ?? [])
+    .map((l) => (typeof l === 'string' ? { text: l } : l))
+    .filter((l) => props.clicks >= (l.at ?? 0)),
+)
 </script>
 
 <style scoped>
@@ -59,6 +72,10 @@ defineProps({
 
 .term-text.focused {
   filter: none;
+}
+
+.muted {
+  opacity: 0.35;
 }
 
 .term-text.alert {

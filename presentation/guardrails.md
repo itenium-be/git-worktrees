@@ -17,39 +17,9 @@ guardrails & backpressure
 
 ---
 layout: fm-content
-showSpeaker: true
-speakerTitle: ""
-center: true
----
-
-# Guardrails & Backpressure<br>Before You Let Go Of The Wheel
-
-<v-click>
-
-<p class="aside">(the boring part that makes the rest possible)</p>
-
-</v-click>
-
-<style>
-.aside {
-  margin-top: 1.5rem;
-  font-size: 1.4rem;
-  font-style: italic;
-  opacity: 0.55;
-}
-</style>
-
-<!--
-- Somewhere in a terminal behind me an architect is already working on a feature
-- We'll get back to it
-- First: the part nobody wants to hear about
--->
-
----
-layout: fm-content
-speakerTitle: The Claude Transformation Series
+speakerTitle: The Dark Factory
 naked: true
-clicks: 5
+clicks: 6
 ---
 
 <script setup>
@@ -67,23 +37,258 @@ import { series, stagesGuardrails } from './components/guardrailsScenes.mjs'
 ---
 layout: fm-content
 speakerTitle: The Problem
-center: true
+naked: true
 flicker: true
+clicks: 2
 ---
 
-# six agents write more diff<br>than you can read
+<Storm>
+  <div class="storm-box" :class="{ swapped: $clicks >= 2 }">
+    <div class="panel problem">
+      <h1>AI is going to write code</h1>
+      <v-click>
+        <p class="aside">(that non-deterministic slop machine)</p>
+      </v-click>
+    </div>
+    <div class="panel solution">
+      <h1>Hoe laten we die<br>binnen de lijntjes kleuren</h1>
+    </div>
+  </div>
+</Storm>
 
-<v-click>
+<style>
+/* Both panels share one grid cell, so the box is sized for the larger and never jumps on the swap. */
+.storm-box {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  margin: auto;
+  padding: 2.5rem 4rem;
+  overflow: hidden;
+  border: 2px solid #5fc3db;
+  border-radius: 1.25rem;
+  background: rgba(29, 29, 27, 0.88);
+  text-align: center;
+}
 
-## not more than is comfortable — more than is possible
+.storm-box .panel {
+  grid-area: 1 / 1;
+  align-self: center;
+  transition: transform 700ms ease, opacity 700ms ease;
+}
 
-</v-click>
+.storm-box .solution {
+  transform: translateY(150%);
+  opacity: 0;
+}
 
-<!--
-- So you do what everyone does: skim, trust the green check, approve
-- Full cost of review, and you get a rubber stamp
-- The slop gets in anyway, laundered through a passing pipeline and your own fatigue
--->
+.storm-box.swapped .problem {
+  transform: translateY(-150%);
+  opacity: 0;
+}
+
+.storm-box.swapped .solution {
+  transform: none;
+  opacity: 1;
+}
+
+.storm-box h1 {
+  margin: 0;
+  font-size: 3rem;
+  color: #fff;
+}
+
+.storm-box .aside {
+  margin: 1.2rem 0 0;
+  font-size: 1.4rem;
+  font-style: italic;
+  opacity: 0.55;
+}
+</style>
+
+---
+layout: fm-content
+speakerTitle: These and other Prayers
+flicker: true
+naked: true
+clicks: 4
+---
+
+<script setup>
+import { suggestions } from './components/guardrailsScenes.mjs'
+</script>
+
+<Graveyard :stones="suggestions" :clicks="$clicks" />
+
+---
+layout: fm-content
+speakerTitle: "The Resurrection: Backpressure"
+naked: true
+clicks: 4
+---
+
+<script setup>
+import { answered } from './components/guardrailsScenes.mjs'
+</script>
+
+<Graveyard :stones="answered" :weather="$clicks" :clicks="$clicks" />
+
+---
+layout: fm-content
+speakerTitle: "LSP: Language Server Protocol"
+bleed: true
+clicks: 2
+---
+
+<script setup>
+import { lspDiagnostics } from './components/guardrailsScenes.mjs'
+</script>
+
+<Terminal :tabs="lspDiagnostics" :clicks="$clicks" />
+
+---
+layout: fm-content
+speakerTitle: Becoming Deterministic
+naked: true
+clicks: 10
+---
+
+<script setup>
+import { hookStages, hookChecks, hookMoral } from './components/guardrailsScenes.mjs'
+</script>
+
+<HookMatrix :stages="hookStages" :checks="hookChecks" :moral="hookMoral" :clicks="$clicks" />
+
+---
+layout: fm-content
+speakerTitle: Your Arsenal
+naked: true
+flicker: true
+clicks: 4
+---
+
+<script setup>
+import { arsenal } from './components/guardrailsScenes.mjs'
+</script>
+
+<ArsenalInventory :weapons="arsenal" :clicks="$clicks" />
+
+---
+layout: fm-content
+speakerTitle: 'The LLM Is Trained To Be "Helpful"'
+naked: true
+center: true
+---
+
+<div class="help-box">
+  <div class="lead">It gets creative with those guardrails</div>
+  <v-click>
+    <div class="punch">It needs to be chained — deterministically</div>
+  </v-click>
+</div>
+
+<style>
+.help-box {
+  margin: auto;
+  padding: 2.5rem 4rem;
+  border: 2px solid #5fc3db;
+  border-radius: 1.25rem;
+  background: rgba(29, 29, 27, 0.88);
+  text-align: center;
+  white-space: nowrap;
+  font-family: var(--font-heading);
+}
+
+.lead {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.punch {
+  margin-top: 1.5rem;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #5fc3db;
+}
+</style>
+
+---
+layout: fm-content
+speakerTitle: Hardening The Guardrails
+bleed: true
+clicks: 3
+---
+
+<script setup>
+import { noVerify } from './components/guardrailsScenes.mjs'
+</script>
+
+<Terminal :tabs="noVerify" :clicks="$clicks" />
+
+---
+layout: fm-content
+speakerTitle: Guarding The Guardrails
+bleed: true
+clicks: 4
+---
+
+<script setup>
+import { guarding } from './components/guardrailsScenes.mjs'
+</script>
+
+<Terminal :tabs="guarding" :clicks="$clicks" />
+
+---
+layout: fm-content
+speakerTitle: Guarding The Guardrails
+naked: true
+center: true
+---
+
+<div class="watch">You'll have to monitor the squirming</div>
+
+<div class="watch-row">
+  <div v-click class="watch-box">Be Creative</div>
+  <div v-click class="watch-box"><span>Balancing<br>"get shit done"<br>vs<br>"going off the rails"</span></div>
+</div>
+
+<style>
+.watch {
+  padding: 2rem 3rem;
+  border: 2px solid #5fc3db;
+  border-radius: 1.25rem;
+  background: rgba(29, 29, 27, 0.88);
+  font-family: var(--font-heading);
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.watch-row {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 2rem;
+  width: 100%;
+}
+
+.watch-box {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.4rem 1.8rem;
+  border: 2px solid #5fc3db;
+  border-radius: 1.25rem;
+  background: rgba(29, 29, 27, 0.88);
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #5fc3db;
+  text-align: center;
+}
+</style>
 
 ---
 layout: fm-content
@@ -151,26 +356,6 @@ import { twoRules } from './components/guardrailsScenes.mjs'
 <!--
 - Backpressure: the agent cannot proceed, not that it feels discouraged
 - When I catch something by hand, the lesson is never "review more"
--->
-
----
-layout: fm-content
-speakerTitle: Guardrails, By When They Fire
-naked: true
-clicks: 5
----
-
-<script setup>
-import { whenTheyFire } from './components/guardrailsScenes.mjs'
-</script>
-
-<FinalThoughts :columns="whenTheyFire" :clicks="$clicks" />
-
-<!--
-- (click) Before the code exists: conventions, skills, a PreToolUse hook can refuse an edit outright
-- (click) At commit: format, lint, secrets — (click) keep it under five seconds or a human --no-verify's it out of existence within a week
-- (click) At build: the heavy artillery
-- (click) At merge and after: that is the next two decks
 -->
 
 ---
