@@ -49,9 +49,9 @@ const clouds = [
   { top: '30%', width: '32%', height: '7%', animationDuration: '240s', animationDelay: '-150s', opacity: 0.28 },
 ]
 
-// 0 night · 1 sunrise, and anything between. A slide sets it in headmatter (`dawn: true`,
-// `dawn: <click>` to rise on that click, or `dusk: <click>` to start sunny and fall dark on it); a
-// component on the slide can instead raise it over the clicks by writing to the injected ref.
+// 0 night · 1 sunrise, and anything between. A slide sets it in headmatter (`dawn: true`, or
+// `dawn: <click>` to rise on that click); a component on the slide can instead raise it over
+// the clicks by writing to the injected ref.
 const raised = ref(0)
 provide('fmDawn', raised)
 
@@ -61,8 +61,6 @@ const { $slidev, $frontmatter, $clicks } = useSlideContext()
 const level = computed(() => {
   const dawn = $frontmatter.dawn
   if (typeof dawn === 'number') return $clicks.value >= dawn ? 1 : 0
-  const dusk = $frontmatter.dusk
-  if (typeof dusk === 'number') return $clicks.value >= dusk ? 0 : 1
   return dawn ? 1 : raised.value
 })
 // A deck's headmatter `brand: itenium` swaps the FrontMania badge for the itenium logo.

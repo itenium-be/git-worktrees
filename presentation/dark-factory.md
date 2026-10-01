@@ -271,27 +271,20 @@ layout: fm-content
 speakerTitle: The Fleet
 bleed: true
 spill: true
-dusk: 1
 clicks: 1
 ---
 
 <script setup>
 import { agentSessions } from './components/termScenes.mjs'
 import { fleetScreens, fleetScreensDark } from './components/darkFactoryScenes.mjs'
-import LightBulb from './components/LightBulb.vue'
+import LightsOut from './components/LightsOut.vue'
 </script>
 
-<Screens
-  :sessions="$clicks >= 1 ? agentSessions.slice(0, 5) : agentSessions.slice(0, 7)"
-  :labels="$clicks >= 1 ? fleetScreensDark : fleetScreens"
-  :left="$clicks >= 1 ? 2 : 4"
-  :clicks="3"
-/>
-<LightBulb :off="$clicks >= 1" />
+<LightsOut :sessions="agentSessions" :labels="fleetScreens" :dark-labels="fleetScreensDark" :clicks="$clicks" />
 
 <!--
 - Everyone at work, lights on
-- (click) Turning off the lights
+- (click) Turning off the lights: going dark
 -->
 
 ---
