@@ -2,7 +2,7 @@
   <div class="slidev-layout fm-content" :class="{ dawn: level >= 1 }">
     <img :src="backdrop" class="fm-backdrop" aria-hidden="true" />
     <img :src="dawnBackdrop" class="fm-backdrop fm-backdrop-dawn" :style="{ opacity: level }" aria-hidden="true" />
-    <div v-if="level > 0" class="fm-dawn" :style="{ opacity: level }">
+    <div class="fm-dawn" :style="{ opacity: level }">
       <div class="fm-dawn-wash" />
       <div class="fm-dawn-lift" />
       <div class="fm-rainbow" />
@@ -49,15 +49,22 @@ const clouds = [
   { top: '30%', width: '32%', height: '7%', animationDuration: '240s', animationDelay: '-150s', opacity: 0.28 },
 ]
 
-// 0 night · 1 sunrise, and anything between. A slide sets it in headmatter; a component on
-// the slide can instead raise it over the clicks by writing to the injected ref.
+// 0 night · 1 sunrise, and anything between. A slide sets it in headmatter (`dawn: true`,
+// `dawn: <click>` to rise on that click, or `dusk: <click>` to start sunny and fall dark on it); a
+// component on the slide can instead raise it over the clicks by writing to the injected ref.
 const raised = ref(0)
 provide('fmDawn', raised)
 
 // Calling this ourselves opts out of Slidev's auto-injected context, so the template's
 // $slidev and $frontmatter have to come from here.
-const { $slidev, $frontmatter } = useSlideContext()
-const level = computed(() => ($frontmatter.dawn ? 1 : raised.value))
+const { $slidev, $frontmatter, $clicks } = useSlideContext()
+const level = computed(() => {
+  const dawn = $frontmatter.dawn
+  if (typeof dawn === 'number') return $clicks.value >= dawn ? 1 : 0
+  const dusk = $frontmatter.dusk
+  if (typeof dusk === 'number') return $clicks.value >= dusk ? 0 : 1
+  return dawn ? 1 : raised.value
+})
 // A deck's headmatter `brand: itenium` swaps the FrontMania badge for the itenium logo.
 const itenium = computed(() => $slidev.configs.brand === 'itenium')
 const barTitle = computed(() => $frontmatter.speakerTitle ?? $slidev.configs.speakerTitle)
@@ -210,14 +217,14 @@ const barTitle = computed(() => $frontmatter.speakerTitle ?? $slidev.configs.spe
 /* --- dawn: the same night scene talked into a sunrise, for the "life was good" beats --- */
 
 .fm-backdrop-dawn {
-  transition: opacity 1200ms ease;
+  transition: opacity 3000ms ease;
 }
 
 .fm-dawn {
   position: absolute;
   inset: 0;
   z-index: 0;
-  transition: opacity 1200ms ease;
+  transition: opacity 3000ms ease;
 }
 
 /* Every dawn layer stays under .fm-card (z-index 1) and stacks on the backdrop by DOM order. */
@@ -313,7 +320,7 @@ const barTitle = computed(() => $frontmatter.speakerTitle ?? $slidev.configs.spe
 }
 
 .fm-content.dawn .fm-speaker {
-  transition: color 1200ms ease;
+  transition: color 3000ms ease;
   color: #2A1D12;
   text-shadow: 0 0 0.7em rgba(255, 246, 220, 0.95), 0 0.05em 0.1em rgba(255, 255, 255, 0.7);
 }
@@ -323,6 +330,7 @@ const barTitle = computed(() => $frontmatter.speakerTitle ?? $slidev.configs.spe
 }
 
 .fm-content.dawn .fm-card:not(.naked) {
+  transition: background-color 3000ms ease, border-color 3000ms ease, color 3000ms ease, box-shadow 3000ms ease;
   background: rgba(255, 249, 238, 0.72);
   border-color: #E8A33D;
   color: var(--fm-ink);
@@ -330,10 +338,12 @@ const barTitle = computed(() => $frontmatter.speakerTitle ?? $slidev.configs.spe
 }
 
 .fm-content.dawn .fm-card :deep(h1) {
+  transition: color 3000ms ease;
   color: #2A1D12;
 }
 
 .fm-content.dawn .fm-card :deep(h2) {
+  transition: color 3000ms ease;
   color: #1F8A5B;
 }
 </style>
