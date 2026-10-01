@@ -1,7 +1,13 @@
 <template>
   <div class="term-window">
     <div class="term-chrome">
-      <div v-for="(tab, i) in tabs" :key="tab.title" class="term-tab" :class="{ active: i === activeIndex }">
+      <div
+        v-for="(tab, i) in tabs"
+        v-show="clicks >= (tab.shownAt ?? 0)"
+        :key="tab.title"
+        class="term-tab"
+        :class="{ active: i === activeIndex }"
+      >
         <span class="term-tab-icon" :class="tab.icon" />
         <span class="term-tab-title">{{ tab.title }}</span>
         <span class="term-tab-x">✕</span>
@@ -28,7 +34,8 @@ const props = defineProps({
   clicks: { type: Number, default: 0 },
 })
 
-// The last tab whose click has landed wins, so tabs switch as the talk advances.
+// The last tab whose click has landed wins, so tabs switch as the talk advances. A tab with `shownAt`
+// only opens at that click; one that never becomes active takes `at: Infinity`.
 const activeIndex = computed(() => {
   let idx = 0
   props.tabs.forEach((tab, i) => { if (props.clicks >= (tab.at ?? 0)) idx = i })
