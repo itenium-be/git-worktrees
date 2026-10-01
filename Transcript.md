@@ -109,7 +109,7 @@ Slide 13:
 - Once an agent was ready, it added its work to the merge queue so it could move on to do something else
 - This is not a new concept, as you can imagine, even before AI this was already an issue for huge teams
 - working on monorepos. Bors already solved this problem in 2013.
-- If you have a paying Github subscription you get that out of the box.
+- GitHub has it built in for org repos, GitLab calls it merge trains.
 - So what does this look like...?
 
 
@@ -124,7 +124,7 @@ Slide 14:
 
 Slide 15:
 - So I'm not there yet but the next step is potentially that the merge queue itself becomes the bottleneck
-- We can use a fix-forward approach that is used in triple-A game studios:
+- We can use a fix-forward approach that is used in triple-A game studios and Google's monorepo:
 - Because running the build takes so long, we just merge everything that builds
 - And then stabilize the main branch later.
 -

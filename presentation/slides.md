@@ -149,6 +149,10 @@ import { risen } from './components/termScenes.mjs'
 
 <Graveyard :stones="risen" :weather="$clicks" :clicks="$clicks" />
 
+<!--
+.worktreeinclude is not git: Claude Code or a git extension.
+-->
+
 
 ---
 layout: fm-content
@@ -215,6 +219,10 @@ import { finalThoughts } from './components/termScenes.mjs'
 </script>
 
 <FinalThoughts :columns="finalThoughts" :clicks="$clicks" />
+
+<!--
+Before dropping the suite: batch. Test main+A+B+C at once, bisect on red (bors, GitHub merge queue). Buys time, doesn't remove the wall.
+-->
 
 
 ---
