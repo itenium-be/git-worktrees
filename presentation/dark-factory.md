@@ -35,27 +35,6 @@ import { series, stagesDarkFactory } from './components/darkFactoryScenes.mjs'
 
 ---
 layout: fm-content
-speakerTitle: Meanwhile
-naked: true
-clicks: 4
----
-
-<script setup>
-import { demoTimeline } from './components/darkFactoryScenes.mjs'
-</script>
-
-<FinalThoughts :columns="demoTimeline" :clicks="$clicks" />
-
-<!--
-- Remember the mockups that popped up at the start
-- (click) Prompt one: the mocks
-- (click) Prompt two: the beads
-- (click) The rest of the backlog is deferred, so the fleet has exactly one thing to do
-- (click) We'll look at where it is at the end
--->
-
----
-layout: fm-content
 speakerTitle: The Realisation
 center: true
 flicker: true
