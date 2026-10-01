@@ -11,9 +11,9 @@
           </div>
           <div class="body">
           <div class="grid grid-a">
-            <div v-for="(s, i) in sessions.slice(0, 4)" :key="i" class="cell" :class="{ top: i < 2 }">
+            <div v-for="(s, i) in sessions.slice(0, left)" :key="i" class="cell" :class="{ top: i < 2 }">
               <pre>{{ s.join('\n') }}</pre>
-              <div class="label">claude code</div>
+              <div class="label" :style="labelStyle(i)">{{ labelText(i) }}</div>
             </div>
           </div>
           </div>
@@ -34,9 +34,9 @@
           </div>
           <div class="body">
           <div class="grid grid-b">
-            <div v-for="(s, i) in sessions.slice(4, 6)" :key="i" class="cell">
+            <div v-for="(s, i) in sessions.slice(left, left + 2)" :key="i" class="cell">
               <pre>{{ s.join('\n') }}</pre>
-              <div class="label">claude code</div>
+              <div class="label" :style="labelStyle(left + i)">{{ labelText(left + i) }}</div>
             </div>
           </div>
           </div>
@@ -57,9 +57,9 @@
           </div>
           <div class="body">
           <div class="grid grid-c">
-            <div v-for="(s, i) in sessions.slice(6, 9)" :key="i" class="cell">
+            <div v-for="(s, i) in sessions.slice(left + 2, left + 5)" :key="i" class="cell">
               <pre>{{ s.join('\n') }}</pre>
-              <div class="label">claude code</div>
+              <div class="label" :style="labelStyle(left + 2 + i)">{{ labelText(left + 2 + i) }}</div>
             </div>
           </div>
           </div>
@@ -78,7 +78,14 @@ import { computed } from 'vue'
 const props = defineProps({
   sessions: { type: Array, required: true },
   clicks: { type: Number, default: 0 },
+  // Optional `{ name, color }` per session, in the same order; unnamed panes read "claude code".
+  labels: { type: Array, default: () => [] },
+  // Panes on the left monitor: 4 as a 2×2, or 2 side by side.
+  left: { type: Number, default: 4 },
 })
+
+const labelText = (k) => props.labels[k]?.name ?? 'claude code'
+const labelStyle = (k) => (props.labels[k]?.color ? { color: props.labels[k].color } : {})
 
 // 0: two agents · 1: four · 2: a second screen · 3: a third, three more agents
 const stage = computed(() => Math.min(props.clicks, 3))
@@ -116,9 +123,12 @@ const stage = computed(() => Math.min(props.clicks, 3))
 }
 
 /* Three monitors are the whole slide; the card behind them is just a frame. */
-:global(.fm-card:has(.wall.stage-3)) {
+/* The second selector outweighs the layout's daylight card, which would paint it cream. */
+:global(.fm-card:has(.wall.stage-3)),
+:global(.fm-content.dawn .fm-card:not(.naked):has(.wall.stage-3)) {
   background: transparent;
   border-color: transparent;
+  box-shadow: none;
   transition: background-color 600ms ease, border-color 600ms ease;
 }
 
@@ -315,6 +325,14 @@ const stage = computed(() => Math.min(props.clicks, 3))
 
 .grid-c .cell:first-child {
   grid-row: 1 / span 2;
+}
+
+.grid-a:has(> .cell:nth-child(2):last-child) {
+  grid-template-rows: 1fr;
+}
+
+.grid-c .cell:only-child {
+  grid-column: 1 / -1;
 }
 
 .cell {
