@@ -13,7 +13,12 @@
           <p class="sub" v-html="t.subTitle" />
         </div>
 
-        <div v-if="t.expandAt != null" class="stages" :class="{ open: isExpanded(t) }">
+        <div
+          v-if="t.expandAt != null"
+          class="stages"
+          :class="{ open: isExpanded(t) }"
+          :style="{ gridTemplateColumns: stages.map(() => 'minmax(0, 1fr)').join(' auto ') }"
+        >
           <template v-for="(s, j) in stages" :key="j">
             <div v-if="j" class="joiner" :class="{ on: clicks >= s.at }">+</div>
             <div class="stage" :class="{ on: clicks >= s.at, here: s.note }">
@@ -212,9 +217,10 @@ watch(
   max-height: 0;
   opacity: 0;
   overflow: hidden;
-  display: flex;
-  align-items: stretch;
-  gap: 1rem;
+  display: grid;
+  grid-template-rows: 1fr auto 1fr;
+  grid-auto-flow: column;
+  column-gap: 1rem;
   transition: max-height 600ms ease, opacity 600ms ease, margin-top 600ms ease;
 }
 
@@ -225,14 +231,13 @@ watch(
   opacity: 1;
 }
 
-/* Equal outer rows put every title on the box's midline, whatever each stage carries below it. */
+/* Rows are shared across stages, so every title sits on one line whatever each stage carries below it. */
 .stage {
-  flex: 1;
-  min-width: 0;
+  grid-row: 1 / -1;
   display: grid;
-  grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-rows: subgrid;
   justify-items: center;
-  padding: 1rem 0.8rem;
+  padding: 0.5rem 0.8rem;
   box-sizing: border-box;
   border: 1px solid rgba(95, 195, 219, 0.55);
   border-radius: 0.75rem;
@@ -331,6 +336,7 @@ watch(
 }
 
 .joiner {
+  grid-row: 1 / -1;
   align-self: center;
   font-size: 2rem;
   font-weight: 700;
