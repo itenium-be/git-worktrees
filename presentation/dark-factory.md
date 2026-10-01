@@ -289,48 +289,227 @@ import LightsOut from './components/LightsOut.vue'
 
 ---
 layout: fm-content
-speakerTitle: Future?
-center: true
+speakerTitle: "The Future: Bellows"
+naked: true
+clicks: 6
 ---
 
-| Add                      | What it would be                                                                                               |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------- |
-| **Stuck detection**      | a window that stops mid-bead, noticed and restarted                                                            |
-| **A token budget**       | a concurrency cap, cost per bead                                                                               |
-| **Sandboxing**           | permissions, no prod credentials within an agent's reach                                                       |
-| **Feature flags**        | land dark, switch on later                                                                                     |
-| **Rollback**             | what happens when a landed bead breaks prod                                                                    |
-| **Self-improvement**     | a lesson caught by hand becomes a new check or skill                                                           |
-| **Storybook & template** | an example of how to build a grid, an edit screen, a dashboard, …<br>different every time, the same every time |
-| **Gauge**                | an auditor: reads the whole repo after it landed, files the drift, never fixes                                 |
+<script setup>
+import { bellowsQuestions } from './components/darkFactoryScenes.mjs'
+import { bellowsTui } from './components/bellowsTui.mjs'
+import BellowsFuture from './components/BellowsFuture.vue'
+</script>
+
+<BellowsFuture :questions="bellowsQuestions" :tui="bellowsTui" :clicks="$clicks" />
 
 <!--
-- Storybook & template: Thoughtworks Radar vol. 33, [Anchoring coding agents to a reference application](https://www.thoughtworks.com/radar/techniques/anchoring-coding-agents-to-a-reference-application)
-- Gauge: each diff is fine on its own, the whole drifts
+- (click ×5) the questions Bellows has to answer; each dial is the page that half-answers it today
+- (click) a cockpit, the thousand mile view: I am experimenting with a WebUI and a TUI
+-->
+
+---
+layout: fm-content
+speakerTitle: "The Future: Reference Application"
+naked: true
+clicks: 4
+---
+
+<div class="ref-hub">
+  <div v-click="1" class="ref-role ref-arch">
+    <div class="ref-name">Architect</div>
+    <div class="ref-does">plans a grid like the reference grid</div>
+  </div>
+  <div v-click="1" class="ref-arrow">→</div>
+  <div class="ref-core">
+    <div class="ref-title">Reference Application</div>
+    <div class="ref-parts"><span>Itenium.Template</span><span>Storybook</span></div>
+    <div class="ref-examples">grid · edit screen · dashboard · …</div>
+  </div>
+  <div v-click="2" class="ref-arrow">←</div>
+  <div v-click="2" class="ref-role ref-impl">
+    <div class="ref-name">Implementers</div>
+    <div class="ref-does">build it like the one that already works</div>
+  </div>
+  <div v-click="3" class="ref-down">↓ go / no-go</div>
+  <div v-click="3" class="ref-role ref-gauge">
+    <div class="ref-name">Gauge</div>
+    <div class="ref-does">holds every repo against it, files the drift</div>
+  </div>
+</div>
+
+<div v-click="4" class="ref-tagline">different every time → the same every time</div>
+
+<!--
+- Thoughtworks Radar vol. 33: [Anchoring coding agents to a reference application](https://www.thoughtworks.com/radar/techniques/anchoring-coding-agents-to-a-reference-application)
+- A live, compilable codebase is the source of truth, not prompt examples
+- (click) the architect plans from it instead of inventing
+- (click) implementers copy what already works
+- (click) Gauge: each diff is fine on its own, the whole drifts
 -->
 
 <style>
+.ref-hub {
+  display: grid;
+  grid-template-columns: 1fr auto 1.3fr auto 1fr;
+  grid-template-rows: auto auto auto;
+  align-items: center;
+  column-gap: 1rem;
+  row-gap: 0.6rem;
+  margin-top: 3rem;
+  color: #fff;
+}
+
+.ref-role,
+.ref-core {
+  padding: 0.9rem 1rem;
+  border: 2px solid var(--ref-c);
+  border-radius: 0.9rem;
+  background: rgba(29, 29, 27, 0.92);
+}
+
+.ref-arch { --ref-c: #d9ad0b; }
+.ref-impl { --ref-c: #d97757; }
+
+.ref-gauge {
+  --ref-c: #8fae9a;
+  grid-column: 3;
+  border-style: dashed;
+}
+
+.ref-core {
+  --ref-c: #5fc3db;
+  padding: 1.6rem 1.2rem;
+  text-align: center;
+  box-shadow: 0 0 2rem rgba(95, 195, 219, 0.35);
+}
+
+.ref-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ref-c);
+}
+
+.ref-does {
+  margin-top: 0.3rem;
+  font-size: 0.8rem;
+  color: #cfc6d4;
+}
+
+.ref-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #5fc3db;
+}
+
+.ref-parts {
+  display: flex;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 0.8rem;
+}
+
+.ref-parts span {
+  padding: 0.2rem 0.6rem;
+  border: 1px solid rgba(95, 195, 219, 0.55);
+  border-radius: 0.4rem;
+  font-family: 'Cascadia Code', Consolas, monospace;
+  font-size: 0.75rem;
+}
+
+.ref-examples {
+  margin-top: 0.7rem;
+  font-size: 0.75rem;
+  color: #9a8fa3;
+}
+
+.ref-arrow {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #5fc3db;
+}
+
+.ref-down {
+  grid-column: 3;
+  text-align: center;
+  font-family: 'Cascadia Code', Consolas, monospace;
+  font-size: 0.8rem;
+  color: #8fae9a;
+}
+
+
+.ref-tagline {
+  margin-top: calc(2.5rem + 30px);
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #5fc3db;
+}
+</style>
+
+---
+layout: fm-content
+speakerTitle: Future?
+naked: true
+center: true
+---
+
+| Add                     | What it would be                                        | Who                                                                                         |
+| ----------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| **Stuck detection**     | a window that stops mid-bead, noticed and restarted     | <span class="role bellows">Bellows</span>                                                   |
+| **Session handoff**     | a full context window hands its bead to a fresh session | <span class="role implementer">Implementers</span>                                          |
+| **A token budget**      | a concurrency cap, cost per bead, a model per role      | <span class="role bellows">Bellows</span>                                                   |
+| **Sandboxing**          | permissions, no prod credentials                        | <span class="role implementer">Implementers</span> <span class="role observer">Spark</span> |
+| **Rollback**            | what happens when a landed bead breaks prod             | <span class="role lander">Weld</span>                                                       |
+| **Self-improvement**    | a lesson caught by hand becomes a new check or skill    | <span class="role architect">Architects</span>                                              |
+| **Measure the factory** | lead time, cost per bead, bounce rate, reviewer rejects | <span class="role bellows">Bellows</span>                                                   |
+| **Federation**          | factories share a wanted board of open beads            | <span class="role bellows">Bellows</span>                                                   |
+
+<style>
+/* A collapsed table ignores border-radius. */
 table {
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
   font-size: 1.15rem;
   background: rgba(29, 29, 27, 0.88);
   border: 2px solid #5fc3db;
   border-radius: 1.25rem;
 }
 
-th {
+table th {
   color: #5fc3db;
-  text-align: left;
 }
 
-th, td {
+table th, table td {
   padding: 0.55rem 1.4rem;
+  text-align: left;
   border-bottom: 1px solid rgba(95, 195, 219, 0.25);
 }
 
 tr:last-child td {
   border-bottom: none;
 }
+
+table td:last-child, table th:last-child {
+  width: 1%;
+  padding-left: 0.4rem;
+  white-space: nowrap;
+}
+
+.role {
+  display: inline-block;
+  padding: 0.05rem 0.55rem;
+  border: 1px solid var(--role);
+  border-radius: 999px;
+  font-size: 0.7rem;
+  color: var(--role);
+}
+
+.role.bellows { --role: #5fc3db; }
+.role.architect { --role: #d9ad0b; }
+.role.implementer { --role: #d97757; }
+.role.lander { --role: #827dbd; }
+.role.observer { --role: #6a9bcc; }
 </style>
 
 ---

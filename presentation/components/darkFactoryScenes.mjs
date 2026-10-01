@@ -215,6 +215,16 @@ export const fleetScreensDark = [
   { name: 'hoare', color: '#d9ad0b' },
 ]
 
+// What Bellows has to answer, and the page that half-answers it today. `needle` is how far along
+// that answer is, in degrees: -80 empty, 80 full.
+export const bellowsQuestions = [
+  { text: 'What is the fleet doing?', page: 'Dashboard', needle: 30 },
+  { text: 'What should I be doing?', page: 'Observed', needle: -20 },
+  { text: 'What should I be testing?', page: 'Verify', needle: 0 },
+  { text: 'What are the blockers?', page: 'Unblocks', needle: -40 },
+  { text: 'What is the roadmap?', page: 'Plan', needle: -60 },
+]
+
 export const ziektebriefjeBeads = [
   { id: 'projects-7kq4', title: 'contract: DTOs, types, fixtures', lane: 'contract', x: 11, y: 50 },
   { id: 'projects-4mzt', title: 'SickNote table + migration', lane: 'backend', x: 37, y: 24, after: ['projects-7kq4'] },
