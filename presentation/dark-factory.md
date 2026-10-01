@@ -332,14 +332,15 @@ speakerTitle: Future?
 center: true
 ---
 
-| Add                  | What it would be                                            |
-| -------------------- | ----------------------------------------------------------- |
-| **Stuck detection**  | a window that stops mid-bead, noticed and restarted          |
-| **A token budget**   | a concurrency cap, cost per bead                             |
-| **Sandboxing**       | permissions, no prod credentials within an agent's reach     |
-| **Feature flags**    | land dark, switch on later                                   |
-| **Rollback**         | what happens when a landed bead breaks prod                  |
-| **Self-improvement** | a lesson caught by hand becomes a new check or skill         |
+| Add                      | What it would be                                                                                               |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| **Stuck detection**      | a window that stops mid-bead, noticed and restarted                                                            |
+| **A token budget**       | a concurrency cap, cost per bead                                                                               |
+| **Sandboxing**           | permissions, no prod credentials within an agent's reach                                                       |
+| **Feature flags**        | land dark, switch on later                                                                                     |
+| **Rollback**             | what happens when a landed bead breaks prod                                                                    |
+| **Self-improvement**     | a lesson caught by hand becomes a new check or skill                                                           |
+| **Storybook & template** | an example of how to build a grid, an edit screen, a dashboard, …<br>different every time, the same every time |
 
 <style>
 table {
