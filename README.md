@@ -79,3 +79,39 @@ Old term from streams and queues; popularised for coding agents by Geoffrey Hunt
 [linearb]: https://linearb.io/blog/ralph-loop-agentic-engineering-geoffrey-huntley
 [moss]:    https://banay.me/dont-waste-your-backpressure/
 [ssw]:     https://www.ssw.com.au/rules/utilize-back-pressure-for-agents
+
+## Agent factories
+
+Others building what the Dark Factory deck builds by hand.
+
+| Tool                            | What                                                                    |
+| ------------------------------- | ----------------------------------------------------------------------- |
+| [Gas Town][gastown]             | Yegge: coordinator, ephemeral workers, git-backed ledger, merge queue   |
+| [Wasteland][wasteland]          | Federates Gas Towns: shared wanted board, validator stamps (2026-03)    |
+| [Gas City][gascity]             | Gas Town extracted into an SDK for custom agent topologies (2026-04)    |
+| [Claude Agent Teams][teams]     | Built into Claude Code: lead + teammates, shared task list, messaging   |
+| [Ruflo][ruflo]                  | Formerly Claude Flow: orchestrator-worker swarms with persistent memory |
+| [Multiclaude][multiclaude]      | Tmux + worktree per agent; every PR that passes CI gets merged          |
+| [Augment Intent][intent]        | Coordinator, specialists and verifier working from a living spec        |
+| [Antfarm][antfarm]              | YAML pipelines: planner, developer, verifier; stalled since 2026-02     |
+
+[gastown]:     https://github.com/gastownhall/gastown
+[wasteland]:   https://github.com/gastownhall/gastown/blob/main/docs/WASTELAND.md
+[gascity]:     https://github.com/gastownhall/gascity
+[teams]:       https://code.claude.com/docs/en/agent-teams
+[ruflo]:       https://github.com/ruvnet/ruflo
+[multiclaude]: https://github.com/dlorenc/multiclaude
+[intent]:      https://www.augmentcode.com/guides/intent-walkthrough-prompt-to-merge
+[antfarm]:     https://github.com/snarktank/antfarm
+
+Parallel-session managers — a human drives each agent, one worktree each:
+
+| Tool                            | What                                        |
+| ------------------------------- | ------------------------------------------- |
+| [Conductor][conductor]          | Mac app, dashboard plus diff-first review   |
+| [Claude Squad][squad]           | Terminal UI on tmux                         |
+| [Vibe Kanban][vibe]             | Kanban cards that run as agent attempts     |
+
+[conductor]: https://conductor.build
+[squad]:     https://github.com/smtg-ai/claude-squad
+[vibe]:      https://www.vibekanban.com
