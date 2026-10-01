@@ -579,6 +579,7 @@ export const seriesStages = [
     at: 5,
     title: 'A Graph<br>&<br>A Loop',
     lines: ['lights out, nobody watching'],
+    quip: 'what could possibly go wrong',
     fine: {
       at: 6,
       text:

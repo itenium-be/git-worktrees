@@ -2,8 +2,8 @@ import { series as termSeries, seriesStages } from './termScenes.mjs'
 
 export const series = termSeries.map((t) => ({ ...t, title: 'The Dark Factory' }))
 
-export const stagesDarkFactory = seriesStages.map(({ at, title, lines, fine }, i) =>
-  i === 2 ? { at, title, lines, quip: 'what could possibly go wrong', fine, note: 'we are here' } : { at, title },
+export const stagesDarkFactory = seriesStages.map(({ at, title, lines, quip }, i) =>
+  i === 2 ? { at, title, lines, quip, note: 'we are here' } : { at, title },
 )
 
 export const loopNodes = [
