@@ -1,16 +1,16 @@
 ---
 theme: ./theme
-title: "Git Worktrees"
+title: "Git Worktrees & Merge Queues"
 subTitle: One Repo, N Coding Agents
 transition: fade
 session-time: 20min
 track: AI
 type: Theoretical
-first: 2026-10-06
+first: 2026-10-01
 aspectRatio: 16/9
 layout: fm-cover
 speaker: Wouter Van Schandevijl
-speakerTitle: Git Worktrees
+speakerTitle: "Git Worktrees & Merge Queues"
 ---
 
 git worktrees <span style="font-size: 0.6rem; font-weight: 400">&amp; merge queues</span>

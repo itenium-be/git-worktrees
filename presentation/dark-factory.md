@@ -6,6 +6,7 @@ transition: fade
 session-time: 20min
 track: AI
 type: Theoretical
+first: 2026-10-01
 aspectRatio: 16/9
 layout: fm-cover
 speaker: Wouter Van Schandevijl
