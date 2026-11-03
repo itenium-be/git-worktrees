@@ -1,13 +1,17 @@
-Git Worktrees & Merge Queues: One Repo, N Coding Agents
-=======================================================
+Six Agents, One main: Git Worktrees & Merge Queues
+==================================================
 
 ## Abstract
 
-Part 2 of the Dark Factory series. Two coding agents in one checkout
-quietly destroy each other's work. `git worktree` gives each agent its own checkout, and with its
-own ports and testcontainer, its own environment. Scale to 6+ agents and the bottleneck moves:
-every branch is green against a main that has since moved. Enter the merge queue, until the
-queue becomes the bottleneck too.
+While you're sipping margaritas, six coding agents are fixing bugs and shipping features.
+
+One problem: they're fighting over `.git`. One agent is about to nuke your uncommitted work; another just swept
+unrelated changes into its commit. Enter `git worktree`: an obscure, decade-old feature, suddenly becomes
+table stakes, and it solves this elegantly.
+
+Did I say one problem? The next bottleneck surfaces shortly after: all six want to merge to main. Merge queues:
+another decade-old concept, until now something only the largest agile orgs ever needed; suddenly required
+by the lone developer.
 
 
 ## Target Audience

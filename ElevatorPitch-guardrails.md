@@ -3,11 +3,13 @@ Guardrails & Backpressure: Before You Let Go of the Wheel
 
 ## Abstract
 
-Part 1 of the Dark Factory series, and the boring part: probably where you'll spend more time
-than on the factory itself. Add every deterministic guardrail in existence — formatters, linters,
-type checks, automated tests — and turn the knobs to 11. Then the actually tricky part:
-backpressure that keeps the agent getting work done without going off the rails, and hardening
-the guardrails themselves, because the agent will try to get around them.
+You want to let the AI slop machine write code. And it's going to write code, lots of it. And you don't really want to review all of that.
+
+Setting up the guardrails and backpressure is the time-consuming, boring part and it's ongoing: you have to guard the
+guardrails, because the LLM will happily route around them. Handing that job to the LLM itself is not the way. You want
+something deterministic; a "skill" won't cut it.
+
+Is it safe though? Who knows! With the proper guardrails at least we'll feel better about it. And let's be honest: any project with over 12 months of development has always turned into a big ball of mud anyways. Now, maybe, just maybe, we might turn out to be in a better position than we were before. Or it might just all come crumbling down under its own weight. As I said, who knows!
 
 ## Target Audience
 
